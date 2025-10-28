@@ -5,122 +5,87 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>maestro.</title>
 <style>
-  :root{--bg:#0b0e12;--card:#11151c;--line:#212631;--fg:#e6e7eb;--muted:#95a1b2;--chip:#0f141c;--chip-br:#2a3140;--accent:#fff;--danger:#ff4d4f;--ok:#5bef8a}
-  *{box-sizing:border-box} html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);
-    font:16px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-  header{position:sticky;top:0;z-index:9;background:#0a0d11;border-bottom:1px solid var(--line);padding:10px 18px;display:flex;align-items:center;gap:14px;justify-content:space-between}
+  :root{
+    --bg:#0a0c10; --glass:#0e1117aa; --line:#1e2532; --fg:#e8ebf2; --muted:#a7b3c8;
+    --chip:#111827aa; --chip-br:#2c3444; --accent:#ffffff; --danger:#ff4d4f; --ok:#57f2a1;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:
+    radial-gradient(1200px 600px at 15% 10%, #1b2030 0%, transparent 60%),
+    radial-gradient(1200px 600px at 85% 90%, #16202c 0%, transparent 60%),
+    var(--bg);
+    color:var(--fg); font:16px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  header{position:sticky;top:0;z-index:9;background:#0b0f14aa;backdrop-filter:blur(8px);
+    border-bottom:1px solid #ffffff15;padding:10px 18px;display:flex;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:12px}
-  .brand img{height:36px}
-  .tabs{display:flex;gap:6px}
-  .tab{border:1px solid var(--line);padding:8px 12px;border-radius:999px;background:var(--chip);cursor:pointer;color:#c9d3e6}
-  .tab.active{background:#ffffff10;border-color:#ffffff44;color:#fff}
-  main{max-width:1100px;margin:24px auto;padding:0 20px}
-  .panel{display:none;animation:fade .25s ease} .panel.active{display:block}
-  .card{border:1px solid var(--line);background:var(--card);border-radius:16px;padding:14px;box-shadow:0 10px 30px #0006}
-  .title{font-size:13px;text-transform:uppercase;color:var(--muted);letter-spacing:.1em;margin-bottom:8px}
-  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .btn{border:1px solid var(--line);background:var(--chip);color:#fff;padding:10px 12px;border-radius:12px;cursor:pointer}
-  .btn:hover{background:#121a25;border-color:#3a4254}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
-  .chip{border:1px solid var(--chip-br);background:#0e1420;color:#dbe3f5;padding:8px 12px;border-radius:999px;cursor:pointer}
-  .chip.ghost{border-style:dashed;color:#b7bfd1}
-  textarea,input[type="text"]{width:100%;background:#0d1117;color:#e6e7eb;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-  .chat{min-height:380px;max-height:520px;overflow:auto;border:1px dashed var(--line);border-radius:14px;padding:10px;background:#0d1117}
-  .msg{max-width:82%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);margin:8px 0}
-  .bot{background:#0f141c} .user{background:#0b0e12;border-color:#ffffff33}
+  .brand img{height:34px;filter:drop-shadow(0 2px 6px #0008)}
+  .soft{opacity:.9}
+  main{max-width:980px;margin:24px auto;padding:0 16px}
+  .glass{border:1px solid #ffffff20;background:var(--glass);backdrop-filter:blur(14px) saturate(120%);
+    border-radius:18px; box-shadow:0 20px 60px #0006}
+  .wrap{padding:14px}
+  .title{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:0 0 8px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid #ffffff25;background:#ffffff12;color:#fff;padding:10px 12px;border-radius:12px;cursor:pointer}
+  .btn:hover{background:#ffffff1f}
+  input[type="file"]{accent-color:#fff}
+  textarea,input[type="text"]{width:100%;background:#0d1117cc;color:#e6eaf3;border:1px solid #ffffff1f;border-radius:12px;padding:10px 12px}
+  .chat{min-height:420px;max-height:560px;overflow:auto;border:1px dashed #ffffff22;border-radius:16px;padding:10px;background:#0b0f14aa;backdrop-filter:blur(10px)}
+  .msg{max-width:82%;padding:10px 12px;border-radius:12px;border:1px solid #ffffff22;margin:8px 0}
+  .bot{background:#0f141bcc} .user{background:#0b0e13cc;border-color:#ffffff40}
   .muted{color:var(--muted)}
-  .hr{border-top:1px solid var(--line);margin:12px 0}
-  .kv{display:grid;grid-template-columns:170px 1fr;gap:6px;font-size:14px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+  .chip{border:1px solid var(--chip-br);background:var(--chip);color:#e4ecff;padding:8px 12px;border-radius:999px;cursor:pointer;transition:transform .06s ease, background .2s ease}
+  .chip:hover{transform:translateY(-1px);background:#101926}
+  .ghost{border-style:dashed;color:#c6d3ea}
+  .kv{display:grid;grid-template-columns:160px 1fr;gap:6px}
   .files{display:flex;gap:8px;flex-wrap:wrap}
-  .pill{border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#0d1117}
-  .danger{color:var(--danger)} .ok{color:var(--ok)}
-  .footer-actions{display:flex;gap:8px;justify-content:flex-end}
+  .pill{border:1px solid #ffffff22;border-radius:999px;padding:6px 10px;background:#0c1016cc}
+  .footer{display:flex;gap:8px;justify-content:flex-end}
+  .logoWrap{display:flex;justify-content:center;margin-bottom:16px}
+  .logoWrap img{max-width:240px;opacity:.96;filter:drop-shadow(0 6px 30px #000a)}
   .hidden{display:none!important}
-  .logoWrap{display:flex;justify-content:center;padding:26px 0}
-  .logoWrap img{max-width:260px;opacity:.95}
-  @keyframes fade{from{opacity:0}to{opacity:1}}
-  @media (max-width: 980px){.kv{grid-template-columns:120px 1fr}}
+  @media (max-width:900px){ .kv{grid-template-columns:120px 1fr} }
 </style>
 </head>
 <body>
-<header>
+<header class="glass" style="border-radius:0">
   <div class="brand">
     <img src="Union.png" alt="maestro.">
-    <strong>maestro.</strong>
+    <strong class="soft">maestro.</strong>
   </div>
-  <div class="tabs">
-    <div class="tab active" data-tab="chat">Умный чат</div>
-    <div class="tab" data-tab="analyze">Анализ документов</div>
+  <div class="row">
+    <input id="fileChat" type="file" multiple title="Файлы заказчика">
+    <button class="btn" id="addIdea">Моя идея</button>
   </div>
 </header>
 
 <main>
   <div class="logoWrap"><img src="Union.png" alt="maestro."></div>
 
-  <!-- ===== УМНЫЙ ЧАТ ===== -->
-  <section id="panel-chat" class="panel active">
-    <div class="card">
-      <div class="title">Ответы по шаблону + файлы + «Моя идея»</div>
-      <div class="row">
-        <input id="fileChat" type="file" multiple>
-        <button class="btn" id="addIdeaChat">Добавить идею</button>
-        <button class="btn" id="startChat">Начать</button>
-      </div>
-      <div id="ideaChatBox" class="hidden" style="margin-top:8px">
-        <textarea id="ideaChat" placeholder="Опиши идею — она войдёт в документ как «Моя идея»"></textarea>
-      </div>
-      <div class="hr"></div>
-      <div class="chat" id="chatBox"></div>
-      <div class="row">
-        <input id="answerInput" type="text" placeholder="Ответ…">
-        <button class="btn" id="sendAnswer">Ответить</button>
-      </div>
+  <section class="glass wrap">
+    <p class="title">Умный чат (минимальная версия)</p>
+    <div id="chatBox" class="chat glass" style="border:1px solid #ffffff18"></div>
+    <div class="row" style="margin-top:8px">
+      <input id="answerInput" type="text" placeholder="Напишите ответ и нажмите Enter">
+      <button class="btn" id="sendAnswer">Ответить</button>
+      <button class="btn" id="buildDoc">Собрать DOCX</button>
+      <button class="btn" id="zipAll">ZIP</button>
     </div>
-    <div class="card" style="margin-top:16px">
-      <div class="title">Экспорт</div>
-      <div class="kv">
-        <div>Состояние</div><div id="statusChat" class="muted">ожидаю ответов…</div>
-        <div>Файлы</div><div id="filesChat" class="files">—</div>
-      </div>
-      <div class="footer-actions" style="margin-top:8px">
-        <button class="btn" id="buildDocChat">Собрать DOCX</button>
-        <button class="btn" id="zipChat">Скачать ZIP</button>
-      </div>
+    <div id="ideaBox" class="hidden" style="margin-top:8px">
+      <textarea id="ideaText" placeholder="Опишите идею — добавим в документ раздел «Моя идея»"></textarea>
     </div>
-  </section>
-
-  <!-- ===== АНАЛИЗ ДОКУМЕНТОВ ===== -->
-  <section id="panel-analyze" class="panel">
-    <div class="card">
-      <div class="title">Материалы заказчика</div>
-      <div class="row">
-        <input id="fileAnalyze" type="file" multiple>
-        <button class="btn" id="addBlock">+ Добавить блок</button>
-        <button class="btn" id="runAnalyze">Извлечь текст</button>
-      </div>
-      <div id="customList" class="files" style="margin-top:8px"></div>
-      <div class="hr"></div>
-      <div class="title">Извлечённый текст</div>
-      <textarea id="extracted" style="min-height:220px" placeholder="Здесь появятся цитаты из файлов и пользовательских блоков…"></textarea>
-    </div>
-    <div class="card" style="margin-top:16px">
-      <div class="title">Экспорт</div>
-      <div class="kv">
-        <div>Файлы</div><div id="filesAnalyze" class="files">—</div>
-        <div>Покрытие (эвристика)</div><div id="coverage" class="ok">—</div>
-      </div>
-      <div class="footer-actions" style="margin-top:8px">
-        <button class="btn" id="buildDocAnalyze">Собрать DOCX</button>
-        <button class="btn" id="zipAnalyze">Скачать ZIP</button>
-      </div>
+    <div class="kv" style="margin-top:12px">
+      <div class="muted">Статус</div><div id="status">ожидаю…</div>
+      <div class="muted">Файлы</div><div id="files" class="files">—</div>
     </div>
   </section>
 </main>
 
-<!-- ===== LIBS (CDN) ===== -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.min.js" crossorigin="anonymous"></script>
+<!-- LIBS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.min.js"></script>
 <script>if(window['pdfjsLib']) pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.worker.min.js';</script>
 <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
@@ -128,202 +93,243 @@
 <script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.46.2/build/docxtemplater.js"></script>
 
 <script>
-/*** ====== КОНФИГ ====== ***/
-const USE_EXTERNAL_DOCX_TEMPLATE = false; // если true, положи template.docx в корень и добавь плейсхолдеры {answers}, {docs}, {ideas}
+/* ====== Конфиг шаблона ====== */
+const USE_EXTERNAL_DOCX_TEMPLATE = false; // true -> использовать template.docx с {answers},{docs},{ideas}
 const TPL_PATH = 'template.docx';
 
-/*** ====== ТЕКСТОВЫЙ ШАБЛОН (из твоего файла «Шаблон для КП.docx») ======
-  Ниже — тот самый промт-шаблон (урезать не нужно). Он попадёт в начало DOCX,
-  а затем мы добавим блоки «Ответы из формы», «Информация из документов», «Моя идея».
-***/
+// Вставь сюда ПОЛНЫЙ текст из «Шаблон для КП.docx», если не используешь внешний файл:
 const TEMPLATE_PROMPT_TEXT = `
 Универсальный промт для создания продающих коммерческих предложений
-
-Ты — эксперт по созданию высокоэффективных коммерческих предложений...
-[Сокращено в интерфейсе для читаемости: положи полный текст из твоего шаблона сюда.
-Если оставишь как есть — документ соберётся с этим укороченным текстом.]
+[Вставь полный текст твоего шаблона. Он будет заголовком документа.
+Ниже автоматически добавятся секции: «Ответы из формы», «Информация из документов», «Моя идея».]
 `;
 
-/*** ====== УТИЛИТЫ ====== ***/
-const $ = s => document.querySelector(s); const $$ = s => Array.from(document.querySelectorAll(s));
-function toPill(name,size){ return `<span class="pill">${name}${size?` (${Math.round(size/1024)} КБ)`:''}</span>` }
+/* ====== Утилиты ====== */
+const $ = s => document.querySelector(s);
+function toPill(f){return `<span class="pill">${f.name} (${Math.round(f.size/1024)} КБ)</span>`;}
 function readAsText(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result||'');r.onerror=rej;r.readAsText(file);});}
 function readAsAB(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsArrayBuffer(file);});}
-async function extractPDF(file){const data=await readAsAB(file);const pdf=await pdfjsLib.getDocument({data}).promise;let all='';for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const c=await page.getTextContent();all+=c.items.map(i=>i.str).join(' ')+'\n';}return all;}
-async function extractDOCX(file){const data=await readAsAB(file);const out=await window.mammoth.extractRawText({arrayBuffer:data});return out.value||'';}
+async function extractPDF(file){const ab=await readAsAB(file);const pdf=await pdfjsLib.getDocument({data:ab}).promise;let out='';for(let i=1;i<=pdf.numPages;i++){const p=await pdf.getPage(i);const c=await p.getTextContent();out+=c.items.map(x=>x.str).join(' ')+'\n';}return out;}
+async function extractDOCX(file){const ab=await readAsAB(file);const out=await window.mammoth.extractRawText({arrayBuffer:ab});return out.value||'';}
 async function extractFromFiles(files){let out='';for(const f of files){try{
   if(/\.pdf$/i.test(f.name)) out+=`\n\n===== ${f.name} (PDF) =====\n`+(await extractPDF(f)).trim();
   else if(/\.docx$/i.test(f.name)) out+=`\n\n===== ${f.name} (DOCX) =====\n`+(await extractDOCX(f)).trim();
   else if(/\.(txt|md|csv|log)$/i.test(f.name) || (f.type && f.type.startsWith('text'))) out+=`\n\n===== ${f.name} (TEXT) =====\n`+(await readAsText(f)).trim();
-  else out+=`\n\n===== ${f.name} (неизвлекаемый) =====\n[Тип не поддержан в браузере]`;
-}catch(e){out+=`\n\n===== ${f.name} (ошибка) =====\n[${e.message}]`}}return out.trim();}
+  else out+=`\n\n===== ${f.name} (не извлечено) =====\n[Тип не поддержан в браузере]`;
+} catch(e){ out+=`\n\n===== ${f.name} (ошибка) =====\n[${e.message}]`; } } return out.trim();}
 
-/*** ====== ДОКУМЕНТ (DOCX) ====== ***/
-async function buildDocx({templateText, answersText, docsText, ideasText, fileName='maestro.docx'}){
+/* ====== Дерево вопросов (минимальный интерфейс; все из твоего текста) ====== */
+const Q = [
+  // A
+  {id:'A1_company', q:'Расскажите о вашей компании — чем занимаетесь, в какой сфере работаете?', script:'*Начнем с вашего бизнеса. Расскажите, пожалуйста, сферу деятельности и масштаб.*',
+    choices:['Промышленное производство','Недвижимость','Культурные учреждения','Образование','Нефтегаз/энергетика','Фармацевтика/медицина','Выставочная деятельность','Госструктуры (управление туризмом)']},
+  // B
+  {id:'B1_problem', q:'Какую конкретную проблему или задачу хотите решить?', script:'*Какую проблему будем решать? Чем недовольны сейчас?*'},
+  {id:'B2_conseq', q:'Какова цена бездействия? Что будет, если проблему не решать?', script:'*К каким потерям это приводит — деньги, кадры, имидж?*',
+    choices:['Упущенная выручка/продажи','Потеря/дефицит кадров','Отставание от конкурентов','Снижение узнаваемости','Риски травматизма','Низкий охват целевой аудитории']},
+  {id:'B3_tried', q:'Что уже пробовали? Почему не сработало?', script:'*Расскажите о прошлых попытках — что делали и почему не зашло?*'},
+  {id:'B4_kpi', q:'По каким метрикам оценим успех?', script:'*Как поймёте, что проект сработал? Какие цифры хотите увидеть?*'},
+  // C
+  {id:'C1_goal', q:'Какова основная цель проекта?', script:'*Выберите назначение — это задаст архитектуру решения.*',
+    choices:['Обучение и тренировка','Профориентация и HR','Маркетинг и мероприятия','Продажи и презентации','Культура и просвещение','Развлечение и вовлечение']},
+  {id:'C2_audience', q:'Кто будет пользоваться? Опишите аудиторию.', script:'*Возраст, подготовка, технология, B2B/B2C?*'},
+  {id:'C3_context', q:'Где и в каких условиях будет использоваться решение?', script:'*Локация, формат (индивидуально/поток), частота, техника.*'},
+  // D
+  {id:'D1_tech', q:'Какая технология лучше подойдёт?', script:'*Могу порекомендовать вариант под ваши цели и условия.*',
+    choices:['VR','AR','Web-приложение','Мобильное приложение','Интерактивная панель/киоск','Комбинированное']},
+  {id:'D2_vr_mode', q:'(Если VR) Какой режим VR планируете?', script:'*Выберем режим работы шлема — автономный или от ПК.*',
+    choices:['Автономный (standalone)','Стационарный (PC VR)']},
+  {id:'D3_cast', q:'Нужна ли трансляция на внешний экран?', script:'*Нужны ли наблюдатели на экране?*',
+    choices:['Да, нужна трансляция','Нет, только индивидуально']},
+  // E
+  {id:'E1_structure', q:'Как будет устроено приложение?', script:'*Один сценарий или платформа с меню?*',
+    choices:['Простой запускаемый файл','Платформа с меню','Зацикленная экспозиция']},
+  {id:'E2_ready', q:'Что у вас уже есть из контента?', script:'*Сценарий, 3D-модели, фото/видео, тексты, озвучка?*'},
+  {id:'E3_mechanics', q:'Как пользователь взаимодействует?', script:'*Пассивный просмотр / активные действия / обучение+практика / геймификация*',
+    choices:['Пассивный просмотр','Активное взаимодействие','Обучение + практика','Геймификация','Интерактивные элементы']},
+  {id:'E4_time', q:'Длительность одного сеанса?', script:'*Сколько по времени идёт один проход?*',
+    choices:['2–3 минуты','5–7 минут','10–15 минут','20–30 минут','Без ограничений']},
+  {id:'E5_style', q:'Уровень визуальной детализации?', script:'*Фотореализм / стилизация / функциональный стиль*',
+    choices:['Фотореализм','Стилизация','Функциональный стиль']},
+  {id:'E6_voice', q:'Нужна ли озвучка?', script:'*Будет ли профессиональная дикторская озвучка?*',
+    choices:['Профессиональная озвучка','Только текстовые подсказки','Синтезированная речь','Персонализированная озвучка']},
+  // F
+  {id:'F1_hw', q:'Есть ли у вас уже VR/AR-оборудование?', script:'*Есть оборудование или нужна рекомендация?*',
+    choices:['Есть — укажу что именно','Есть частично','Нет — нужна рекомендация','Предложить вариант']},
+  {id:'F2_users', q:'Сколько одновременно пользователей?', script:'*Один/группа/поток/мультиплеер?*',
+    choices:['1 пользователь','2–5 пользователей','Массовый поток','Многопользовательский режим']},
+  {id:'F3_req', q:'Особые технические требования?', script:'*Офлайн, статистика, интеграции, админ-панель?*'},
+  // G
+  {id:'G1_deadline', q:'Когда проект должен быть готов?', script:'*Есть ли жёсткий дедлайн/мероприятие?*',
+    choices:['Экспресс (2–4 недели)','Стандарт (1–2 месяца)','Расширенный (2–3 месяца)','Долгосрочный (3–6 месяцев)','Предложить вариант']},
+  {id:'G2_budget', q:'На какой бюджет ориентируемся?', script:'*Честно обозначим диапазон — под него подберём масштаб.*',
+    choices:['Есть фиксированная сумма','Диапазон (от-до)','Бюджет не определён — нужна оценка','Зависит от решения — обсудим','150–350 тыс. ₽','400–800 тыс. ₽','800 тыс.–1,5 млн ₽','1,5–3 млн ₽','3+ млн ₽','Предложить вариант']},
+  {id:'G3_funds', q:'Источник финансирования?', script:'*Собственные / бюджет/тендер / грант / партнёрство?*',
+    choices:['Собственные средства','Госбюджет / тендер','Грант','Инвестиции/партнёрство']},
+  // H
+  {id:'H1_refs', q:'Есть ли примеры/референсы, которые нравятся?', script:'*Что из наших кейсов или чужих нравится?*'},
+  {id:'H2_source', q:'Как вы о нас узнали?', script:'*Поиск/соцсети/рекомендация/выставка/рассылка/партнёр?*',
+    choices:['Поиск в интернете','Социальные сети','Рекомендация','Видели на выставке','Рекламная рассылка','Существующий клиент/партнёр']},
+  {id:'H3_scale', q:'Планируете ли развивать проект в будущем?', script:'*Разовый проект или масштабируем дальше?*',
+    choices:['Да, планируем масштабировать','Возможно, в перспективе','Нет, разовое решение']}
+];
+
+// Дополнительные ветки после C1
+const BRANCH = {
+  'Обучение и тренировка': [
+    {id:'C1x_skills', q:'Какие конкретные навыки отрабатываются?', script:'*Что должен уметь пользователь после прохождения?*'},
+    {id:'C1x_exam', q:'Нужна ли проверка знаний (экзамен)?', script:'*Нужен режим экзамена?*', choices:['Да','Нет']},
+    {id:'C1x_stats', q:'Нужна ли статистика прохождения?', script:'*Собирать результаты и выгружать?*', choices:['Да','Нет']},
+    {id:'C1x_count', q:'Сколько обучающихся планируется?', script:'*Оцените объём — в месяц/квартал.*'}
+  ],
+  'Маркетинг и мероприятия': [
+    {id:'C1m_date', q:'Дата и место выставки/мероприятия?', script:'*Когда и где будет активация?*'},
+    {id:'C1m_visitors', q:'Ожидаемое количество посетителей?', script:'*Какой поток?*'},
+    {id:'C1m_leads', q:'Нужен ли сбор контактов?', script:'*Добавляем лид-форму/QR?*', choices:['Да','Нет']},
+    {id:'C1m_space', q:'Размер стенда/свободное пространство?', script:'*Какая площадь под интерактив?*'}
+  ],
+  'Продажи и презентации': [
+    {id:'C1s_count', q:'Сколько объектов/планировок показываем?', script:'*Сколько вариантов нужно визуализировать?*'},
+    {id:'C1s_models', q:'Есть ли 3D-модели/чертежи?', script:'*Материалы для визуализации?*'},
+    {id:'C1s_config', q:'Нужна ли кастомизация (отделка/мебель)?', script:'*Выбор опций клиентом?*', choices:['Да','Нет']},
+    {id:'C1s_place', q:'Где будет использоваться (офис продаж/выезд)?', script:'*Контекст презентации?*'}
+  ],
+  'Культура и просвещение': [
+    {id:'C1c_locations', q:'Сколько локаций/объектов?', script:'*Сколько мест нужно показать?*'},
+    {id:'C1c_history', q:'Есть ли историческая справка?', script:'*Материалы для сюжета и фактов?*'},
+    {id:'C1c_quiz', q:'Нужны ли викторины/геймификация?', script:'*Добавим задания и баллы?*', choices:['Да','Нет']},
+    {id:'C1c_rewards', q:'Нужна ли система поощрений?', script:'*Награды/левел-ап?*', choices:['Да','Нет']}
+  ]
+};
+
+// Подстановки для «Предложить вариант»
+const SUGGEST = {
+  F1_hw: 'Рекомендуем Pico 4 / 4 Ultra (автономно или PC VR) + экран 43–55" для трансляции.',
+  G1_deadline: 'Предлагаем режим «Стандарт»: 1–2 месяца с контрольными сборками раз в 2 недели.',
+  G2_budget: 'Предложение по диапазонам: 400–800 тыс. ₽ (база), 800 тыс.–1,5 млн ₽ (стандарт), 1,5–3 млн ₽ (платформа).'
+};
+
+/* ====== Состояние чата ====== */
+const state = { i:-1, queue:[...Q], answers:{}, files:[], idea:'' };
+
+function post(html, klass='bot'){
+  const d=document.createElement('div'); d.className='msg '+klass; d.innerHTML=html;
+  $('#chatBox').appendChild(d); $('#chatBox').scrollTop=1e9;
+}
+function askNext(){
+  state.i++;
+  if(state.i>=state.queue.length){ $('#status').textContent='Ответы собраны — жми «Собрать DOCX»'; post('<em>Спасибо! Нажмите «Собрать DOCX».</em>'); return; }
+  const q = state.queue[state.i];
+  let chips = '';
+  if(q.choices){
+    chips = `<div class="chips">` + q.choices.map(c=>`<span class="chip" data-choice="${c}">${c}</span>`).join(' ')
+      + ` <span class="chip ghost" data-choice="Нет информации">Нет информации</span>`
+      + ((/F1_hw|G1_deadline|G2_budget/.test(q.id))? ` <span class="chip" data-suggest="${q.id}">Предложить вариант</span>`:'')
+      + `</div>`;
+  } else {
+    chips = `<div class="chips"><span class="chip ghost" data-choice="Нет информации">Нет информации</span></div>`;
+  }
+  post(`<strong>${q.q}</strong><br><span class="muted">${q.script}</span>${chips}`);
+  // обработка кликов
+  $('#chatBox').querySelectorAll('.chip').forEach(ch=>{
+    ch.onclick=()=>{
+      if(ch.dataset.suggest){ handle(ch.dataset.suggest, SUGGEST[ch.dataset.suggest]||'Предложим вариант на созвоне.'); }
+      else handle(q.id, ch.dataset.choice);
+    };
+  });
+  // если нужная ветка — подставим вопросы после ответа на C1
+  if(q.id==='C1_goal'){ /* ветки будут добавлены после ответа */ }
+}
+function handle(id, value){
+  const q = state.queue[state.i];
+  const qid = id===undefined? q.id : id;
+  const val = value===undefined? ($('#answerInput').value||'').trim() : value;
+  if(!val){ return; }
+  $('#answerInput').value='';
+  state.answers[qid]=val;
+  post(val,'user');
+
+  // динамическая ветка после C1
+  if(qid==='C1_goal' && BRANCH[val]){
+    const after = state.queue.slice(state.i+1);
+    state.queue = state.queue.slice(0,state.i+1).concat(BRANCH[val]).concat(after);
+  }
+  askNext();
+}
+
+/* ====== Сбор документа ====== */
+async function buildDoc(){
+  // ответы (вопрос → ответ)
+  const lines = state.queue.map(q=> {
+    const ans = state.answers[q.id] ?? '—';
+    return `• ${q.q}\n  Ответ на форму: ${ans}`;
+  }).join('\n');
+
+  // файлы -> текст
+  const docsText = state.files.length? await extractFromFiles(state.files) : '(файлы не приложены)';
+
+  // DOCX
+  $('#status').textContent='Собираю документ…';
+  const blob = await buildDocx({
+    templateText: TEMPLATE_PROMPT_TEXT,
+    answersText: lines,
+    docsText: docsText,
+    ideasText: state.idea || '(не указано)',
+    fileName: 'maestro_chat.docx'
+  });
+  $('#status').textContent='Готово: maestro_chat.docx';
+  return blob;
+}
+
+async function buildDocx({templateText, answersText, docsText, ideasText, fileName}){
   if (USE_EXTERNAL_DOCX_TEMPLATE){
-    // docxtemplater: template.docx должен содержать {answers}, {docs}, {ideas}
     const bin = await (await fetch(TPL_PATH)).arrayBuffer();
-    const zip = new PizZip(bin); const doc = new window.docxtemplater(zip, {paragraphLoop:true,linebreaks:true});
+    const zip = new PizZip(bin);
+    const doc = new window.docxtemplater(zip, {paragraphLoop:true,linebreaks:true});
     doc.render({answers:answersText||'', docs:docsText||'', ideas:ideasText||''});
     const blob = doc.getZip().generate({type:'blob'});
-    saveAs(blob, fileName);
-    return blob;
+    saveAs(blob, fileName); return blob;
   } else {
     const {Document, Packer, Paragraph, HeadingLevel, TextRun} = window.docx;
     function para(t){return new Paragraph({children:[new TextRun({text:t})]});}
     function heading(t){return new Paragraph({text:t, heading:HeadingLevel.HEADING_2});}
-
     const doc = new Document({sections:[{children:[
       heading('Универсальный промт для создания продающих коммерческих предложений'),
-      ...templateText.split(/\n+/).filter(x=>x.trim()).map(t=>para(t)),
-      new Paragraph({}),
-      heading('ОТВЕТЫ ИЗ ФОРМЫ (Ответ на форму)'),
+      ...templateText.split(/\n+/).filter(Boolean).map(para),
+      new Paragraph({}), heading('ОТВЕТЫ ИЗ ФОРМЫ (Ответ на форму)'),
       ...answersText.split('\n').map(para),
-      new Paragraph({}),
-      heading('ИНФОРМАЦИЯ ИЗ ДОКУМЕНТОВ'),
+      new Paragraph({}), heading('ИНФОРМАЦИЯ ИЗ ДОКУМЕНТОВ'),
       ...docsText.split('\n').map(para),
-      new Paragraph({}),
-      heading('МОЯ ИДЕЯ'),
+      new Paragraph({}), heading('МОЯ ИДЕЯ'),
       ...ideasText.split('\n').map(para)
     ]}]});
     const blob = await Packer.toBlob(doc);
-    saveAs(blob, fileName);
-    return blob;
+    saveAs(blob, fileName); return blob;
   }
 }
 
-/*** ====== ВКЛАДКИ ====== ***/
-$$('.tab').forEach(t=>t.onclick=()=>{
-  $$('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
-  $$('.panel').forEach(x=>x.classList.remove('active'));
-  (t.dataset.tab==='chat'?$('#panel-chat'):$('#panel-analyze')).classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
-});
+/* ====== События ====== */
+function start(){
+  $('#chatBox').innerHTML='';
+  state.i=-1; state.queue=[...Q]; state.answers={};
+  post('Поехали. Я задам короткие вопросы — можно выбирать варианты или писать свой ответ.'); askNext();
+}
+$('#sendAnswer').onclick=()=> handle();
+$('#answerInput').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); handle(); } });
 
-/*** ====== РЕЖИМ «УМНЫЙ ЧАТ» ====== ***/
-const QUESTIONS = [
-  {id:'client', q:'Кто клиент? (индустрия, размер, специфика)', demo:'*Как правильно представить вас в КП? Чем занимаетесь и какого масштаба бизнес?*'},
-  {id:'problem', q:'Какую проблему решаем?', demo:'*Если коротко — какая боль мешает достичь результата?*'},
-  {id:'deadline', q:'Крайний срок / когда нужен результат?', demo:'*К какому дню должно работать — ориентир?*'},
-  {id:'budget', q:'Ориентир по бюджету', demo:'*В каком диапазоне комфортно обсуждать инвестиции?*', choices:['до 1 млн ₽','1–3 млн ₽','3–7 млн ₽','7–12 млн ₽']},
-  {id:'platform', q:'Платформа', demo:'*Где это живёт: VR, AR, веб, мобильное приложение, киоск?*', choices:['VR','AR','Веб','Мобильное','Киоск','Комбинация']},
-  {id:'audience', q:'Кто конечные пользователи? (возраст/сфера/подготовка)', demo:'*Кто будет пользоваться прямо руками?*'},
-  {id:'count', q:'Сколько пользователей (1/группа/массово)?', demo:'*Один, небольшие группы или потоки?*', choices:['1','Группа','Массово']},
-  {id:'place', q:'Где используют (офис/выставка/дом/улица)?', demo:'*Основная среда использования — где?*', choices:['Офис','Выставка','Дом','Улица']},
-  {id:'scenario', q:'Есть готовый сценарий/ТЗ?', demo:'*Есть ли уже набросок или делаем с нуля?*', choices:['Да','Частично','Нет','Нет информации']},
-  {id:'duration', q:'Длительность пользовательского опыта (мин)', demo:'*Сколько времени идёт один проход?*', choices:['3–5','5–7','10–15','20+']},
-  {id:'interaction', q:'Тип взаимодействия', demo:'*Это просмотр, тренажёр, обучение с проверкой или микс?*', choices:['Пассивный просмотр','Активный интерактив','Учебный c тестами','Комбинация','Предложить решение']},
-  {id:'assets', q:'Есть ли 3D-модели/контент?', demo:'*Чем располагаете из ассетов?*', choices:['Да (пришлю)','Частично','Нет','Нужна помощь']},
-  {id:'gear', q:'Есть ли оборудование у клиента?', demo:'*Какие устройства уже есть?*', choices:['Pico','Quest','Vive','HoloLens','Планшеты/смартфоны','Нет информации']},
-  {id:'kpi', q:'Как измеряем успех (KPI)?', demo:'*Какие метрики покажут, что всё удалось?*'},
-];
+$('#fileChat').onchange=e=>{ state.files = Array.from(e.target.files||[]); $('#files').innerHTML = state.files.length? state.files.map(toPill).join(' ') : '—'; };
+$('#addIdea').onclick=()=> $('#ideaBox').classList.toggle('hidden');
+$('#ideaText').addEventListener('input', e=> state.idea = e.target.value);
 
-const SUGGESTIONS = {
-  interaction:'Рекомендуем микс: короткие сцены с простыми действиями + быстрая проверка знаний. Такой формат даёт высокий охват и понятный результат.'
+$('#buildDoc').onclick=buildDoc;
+$('#zipAll').onclick=async()=>{
+  const zip=new JSZip(); const blob=await buildDoc(); zip.file('maestro_chat.docx', blob);
+  if(state.files.length){ const af=zip.folder('attachments'); for(const f of state.files){ af.file(f.name, await f.arrayBuffer()); } }
+  saveAs(await zip.generateAsync({type:'blob'}),'maestro_package.zip');
 };
 
-const chatState = {i:-1, answers:{}, files:[], idea:''};
-
-function renderFilesList(node, files){ node.innerHTML = files.length? files.map(f=>toPill(f.name,f.size)).join(' ') : '—'; }
-
-function chatPost(text,klass='bot'){ const div=document.createElement('div'); div.className='msg '+klass; div.innerHTML=text; $('#chatBox').appendChild(div); $('#chatBox').scrollTop=1e9; }
-function askNext(){
-  chatState.i++;
-  if(chatState.i>=QUESTIONS.length){ $('#statusChat').textContent='все ответы получены — собери DOCX'; chatPost('<em>Спасибо! Нажми «Собрать DOCX».</em>','bot'); return; }
-  const q=QUESTIONS[chatState.i];
-  let chips = (q.choices||[]).map(c=>`<span class="chip" data-choice="${c}">${c}</span>`).join(' ');
-  chips += ` <span class="chip ghost" data-choice="Нет информации">Нет информации</span>`;
-  if(q.choices && q.choices.includes('Предложить решение')) chips += ` <span class="chip" data-suggest="${q.id}">Предложить решение</span>`;
-  chatPost(`<strong>${q.q}</strong><br><span class="muted">${q.demo}</span>${q.choices?'<div class="chips" style="margin-top:6px">'+chips+'</div>':''}`);
-  // клики по вариантам
-  $$('#chatBox .chip').forEach(ch=>{
-    ch.onclick=()=>{
-      if(ch.dataset.suggest){ const t=SUGGESTIONS[ch.dataset.suggest]||'Предложим на встрече.'; handleAnswer(t); }
-      else handleAnswer(ch.dataset.choice);
-    }
-  });
-}
-function handleAnswer(val){
-  const q=QUESTIONS[chatState.i];
-  chatState.answers[q.id]=val;
-  chatPost(val,'user'); askNext();
-}
-
-$('#startChat').onclick=()=>{ $('#chatBox').innerHTML=''; chatState.i=-1; chatState.answers={}; chatPost('Поехали. Я задам ряд коротких вопросов.','bot'); askNext(); }
-$('#sendAnswer').onclick=()=>{ const v=$('#answerInput').value.trim(); if(!v) return; $('#answerInput').value=''; handleAnswer(v); }
-$('#addIdeaChat').onclick=()=> $('#ideaChatBox').classList.toggle('hidden');
-
-$('#fileChat').onchange=e=>{ chatState.files = Array.from(e.target.files||[]); renderFilesList($('#filesChat'), chatState.files); }
-
-/*** DOCX из чата ***/
-async function buildFromChat(){
-  // собрать ответы «вопрос → ответ»
-  const ansLines = QUESTIONS.map(q=>{
-    const a = chatState.answers[q.id] || '—';
-    return `• ${q.q}\n  Ответ на форму: ${a}`;
-  }).join('\n');
-  // извлечь текст из приложенных файлов
-  const docsText = chatState.files.length? await extractFromFiles(chatState.files) : '(файлы не приложены)';
-  const idea = ($('#ideaChat').value||'').trim() || '(не указано)';
-  $('#statusChat').textContent='собираю документ…';
-  const blob = await buildDocx({templateText:TEMPLATE_PROMPT_TEXT, answersText:ansLines, docsText:docsText, ideasText:idea, fileName:'maestro_chat.docx'});
-  $('#statusChat').textContent='готово: maestro_chat.docx';
-  return blob;
-}
-$('#buildDocChat').onclick=buildFromChat;
-$('#zipChat').onclick=async()=>{
-  const zip=new JSZip(); const blob=await buildFromChat(); zip.file('maestro_chat.docx', blob);
-  if(chatState.files.length){ const fd=zip.folder('attachments'); for(const f of chatState.files){ fd.file(f.name, await f.arrayBuffer()); } }
-  saveAs(await zip.generateAsync({type:'blob'}),'maestro_chat_package.zip');
-};
-
-/*** ====== РЕЖИМ «АНАЛИЗ ДОКУМЕНТОВ» ====== ***/
-const analyzeState = {files:[], blocks:[]}; // blocks: [{id,title,text}]
-function rerenderBlocks(){
-  const box=$('#customList'); box.innerHTML = analyzeState.blocks.length? '' : '—';
-  analyzeState.blocks.forEach(b=>{
-    const wrap=document.createElement('div'); wrap.className='pill'; wrap.innerHTML=`${b.title} <span class="muted">(${b.text.length} симв.)</span>`;
-    box.appendChild(wrap);
-  });
-}
-$('#fileAnalyze').onchange=e=>{ analyzeState.files = Array.from(e.target.files||[]); $('#filesAnalyze').innerHTML = analyzeState.files.length? analyzeState.files.map(f=>toPill(f.name,f.size)).join(' ') : '—'; };
-
-$('#addBlock').onclick=()=>{
-  const title = prompt('Название блока (например: Запись разговора / Формулировка задачи / Прочий текст):','Прочий текст');
-  if(!title) return;
-  const text = prompt('Вставь или напиши текст для блока:','');
-  analyzeState.blocks.push({id:Math.random().toString(36).slice(2,9), title, text:text||''});
-  rerenderBlocks();
-};
-
-$('#runAnalyze').onclick=async()=>{
-  const filesText = await extractFromFiles(analyzeState.files);
-  const blocksText = analyzeState.blocks.map((b,i)=>`\n\n===== ${i+1}. ${b.title} =====\n${b.text}`).join('');
-  const combined = [filesText, blocksText].filter(Boolean).join('\n').trim();
-  $('#extracted').value = combined || '(ничего не извлечено)';
-  // условная оценка покрытия
-  const have = /срок|бюджет|vr|ar|веб|платформ|сценар|kpi/i.test(combined);
-  $('#coverage').textContent = have? 'есть основа (≈60–80%)' : 'данных мало (≈20–40%)';
-};
-
-async function buildFromAnalyze(){
-  const docsText = $('#extracted').value.trim() || '(ничего не извлечено)';
-  const ansLines = '(режим «Анализ документов» — ответы формы отсутствуют)';
-  const ideas = analyzeState.blocks.filter(b=>/идея/i.test(b.title)).map(b=>b.text).join('\n') || '(не указано)';
-  const blob = await buildDocx({templateText:TEMPLATE_PROMPT_TEXT, answersText:ansLines, docsText:docsText, ideasText:ideas, fileName:'maestro_analyze.docx'});
-  return blob;
-}
-$('#buildDocAnalyze').onclick=buildFromAnalyze;
-$('#zipAnalyze').onclick=async()=>{
-  const zip=new JSZip(); const blob=await buildFromAnalyze(); zip.file('maestro_analyze.docx', blob);
-  if(analyzeState.files.length){ const fd=zip.folder('attachments'); for(const f of analyzeState.files){ fd.file(f.name, await f.arrayBuffer()); } }
-  // пользовательские блоки в отдельной папке
-  if(analyzeState.blocks.length){ const cd=zip.folder('custom'); analyzeState.blocks.forEach((b,i)=>cd.file(`${String(i+1).padStart(2,'0')}_${b.title}.txt`, b.text||'')); }
-  saveAs(await zip.generateAsync({type:'blob'}),'maestro_analyze_package.zip');
-};
-
-/*** Мелочи ***/
-$('#ideaChat').addEventListener('input',()=>{ chatState.idea = $('#ideaChat').value; });
+/* автостарт */
+start();
 </script>
 </body>
 </html>
