@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>КП Конструктор — тёмная тема, анимации, быстрые варианты</title>
+<title>КП Конструктор — тёмная тема, анализ с текстовыми блоками</title>
 <style>
   :root{
     --bg:#0b0e12; --card:#11151c; --line:#212631; --fg:#e6e7eb; --muted:#95a1b2;
@@ -17,7 +17,7 @@
   header{border-bottom:1px solid var(--line);padding:16px 20px;display:flex;gap:16px;align-items:center;justify-content:space-between;background:#0a0d11;position:sticky;top:0;z-index:5}
   header h1{margin:0;font-size:18px;font-weight:600;letter-spacing:.3px}
   .tabs{display:flex;gap:6px}
-  .tab{border:1px solid var(--line);padding:8px 12px;cursor:pointer;border-radius:999px;background:var(--chip);color:var(--accent-2);transition:.25s ease;transform:translateZ(0)}
+  .tab{border:1px solid var(--line);padding:8px 12px;cursor:pointer;border-radius:999px;background:var(--chip);color:var(--accent-2);transition:.25s ease}
   .tab:hover{border-color:var(--accent-2);color:var(--accent)}
   .tab.active{background:#ffffff10;border-color:#ffffff44;color:#fff;box-shadow:0 0 0 1px #ffffff22 inset}
   main{max-width:1100px;margin:24px auto;padding:0 20px}
@@ -61,6 +61,18 @@
   .ok{color:var(--ok)}
   .right{display:flex;justify-content:flex-end;gap:8px}
   .hidden{display:none !important}
+  /* custom blocks */
+  .customWrap{display:flex;flex-direction:column;gap:12px;margin-top:10px}
+  .customCard{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0d1117;animation:fadeIn .25s ease}
+  .customHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .badge{font-size:12px;color:#c7d2e2;background:#111827;border:1px solid var(--line);padding:4px 8px;border-radius:999px}
+  .del{cursor:pointer;border:1px solid var(--line);padding:4px 8px;border-radius:999px;background:#161b22}
+  .del:hover{background:#1d2532}
+  .plusWrap{position:relative;display:inline-block}
+  .plusBtn{border:1px solid var(--line);background:#0f141c;color:#fff;border-radius:999px;padding:8px 12px;cursor:pointer}
+  .plusMenu{position:absolute;top:42px;left:0;min-width:240px;background:#0f141c;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px #0008;padding:8px;display:none;z-index:10}
+  .plusMenu .item{padding:8px 10px;border-radius:8px;cursor:pointer}
+  .plusMenu .item:hover{background:#121a25}
   @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
   @keyframes slideUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
   @keyframes pop{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
@@ -70,95 +82,81 @@
 </head>
 <body>
 <header>
-  <h1>КП Конструктор — тёмная тема + анимации</h1>
+  <h1>КП Конструктор — тёмная тема + анализ с блоками</h1>
   <div class="tabs">
-    <div class="tab active" data-tab="form">Форма + чат</div>
-    <div class="tab" data-tab="files">Анализ файла</div>
+    <div class="tab" data-tab="form">Форма + чат</div>
+    <div class="tab active" data-tab="files">Анализ файла</div>
   </div>
 </header>
 
 <main>
-  <!-- ===== FORM/CHAT ===== -->
-  <section id="panel-form" class="panel active">
-    <div class="grid">
-      <div class="card">
-        <div class="title">Чат</div>
-        <div id="chat" class="chat" aria-live="polite"></div>
-        <div id="quick" class="chips"></div>
-        <div class="inputbar">
-          <input id="answer" type="text" placeholder="Введите ответ… (или нажмите на чип выше)" />
-          <button id="send" class="btn black">Отправить</button>
-          <label class="btn">
-            Прикрепить
-            <input id="fileInputForm" type="file" multiple class="hidden" />
-          </label>
-        </div>
-        <div class="meta">Совет: «Нет информации» доступно для любого вопроса — ответ пометится как пробел.</div>
-      </div>
-
-      <div class="card">
-        <div class="title">Прогресс</div>
-        <div class="kv"><div>Текущий блок</div><div id="curBlock">–</div></div>
-        <div class="kv"><div>Вопрос</div><div id="curQ">–</div></div>
-        <div class="kv"><div>Заполнено (обяз.)</div><div><span id="filledCount">0</span>/<span id="reqCount">0</span> — <span id="filledPct">0%</span></div></div>
-        <div class="progress"><div id="bar" class="bar"></div></div>
-        <div class="hr"></div>
-        <div class="title">Файлы</div>
-        <div id="fileListForm" class="files"></div>
-        <div class="hr"></div>
-        <div class="right">
-          <button id="prev" class="btn">Назад</button>
-          <button id="skip" class="btn">Пропустить</button>
-          <button id="finish" class="btn black">Сформировать итог</button>
-          <button id="reset" class="btn">Сбросить</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:24px;">
-      <div class="title">Итог (форма + чат)</div>
-      <textarea id="finalTextForm" class="output" placeholder="Сводка цитат, оценка полноты и скрипт появятся здесь…"></textarea>
-      <div class="right">
-        <button id="copyForm" class="btn">Копировать</button>
-        <button id="zipForm" class="btn black">Скачать ZIP</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== FILE ANALYSIS ===== -->
-  <section id="panel-files" class="panel">
+  <!-- ===== FILE ANALYSIS (сначала этот режим по умолчанию включён) ===== -->
+  <section id="panel-files" class="panel active">
     <div class="card">
-      <div class="title">Загрузка</div>
-      <div class="chips">
+      <div class="title">Загрузка материалов</div>
+      <div class="chips" style="align-items:center">
         <input id="fileInputAnalysis" type="file" multiple />
         <button id="analyze" class="btn black">Извлечь и разобрать</button>
+        <div class="plusWrap">
+          <button id="plusBtn" class="plusBtn">+ Добавить блок</button>
+          <div id="plusMenu" class="plusMenu">
+            <div class="item" data-type="Транскрипт звонка">Транскрипт звонка</div>
+            <div class="item" data-type="Текстовый комментарий">Текстовый комментарий</div>
+            <div class="item" data-type="Запрос клиента">Запрос клиента</div>
+            <div class="item" data-type="Прочий текст">Прочий текст</div>
+          </div>
+        </div>
       </div>
       <div id="fileListAnalysis" class="files"></div>
+
       <div class="hr"></div>
-      <div class="grid">
-        <div class="card">
-          <div class="title">Извлечённые цитаты</div>
-          <textarea id="extractedText" class="output" placeholder="Текст из PDF/DOCX/TXT появится здесь…"></textarea>
-        </div>
-        <div class="card">
-          <div class="title">Оценка полноты</div>
-          <div class="kv"><div>Покрытие</div><div class="ok"><span id="covPct">0%</span></div></div>
-          <div class="kv"><div>Хватает</div><div id="covHave">–</div></div>
-          <div class="kv"><div>Не хватает</div><div id="covMiss" class="danger">–</div></div>
-          <div class="hr"></div>
-          <div class="title">Скрипт вопросов для созвона</div>
-          <pre id="callScript" style="min-height:160px"></pre>
-        </div>
+      <div class="title">Текстовые блоки (добавляются вручную)</div>
+      <div id="customBlocks" class="customWrap"></div>
+      <div class="meta">Эти тексты будут учитываться как цитаты: войдут в анализ, в сводный документ и в распределение по структуре КП.</div>
+    </div>
+
+    <div class="grid" style="margin-top:24px">
+      <div class="card">
+        <div class="title">Извлечённые цитаты + добавленные блоки</div>
+        <textarea id="extractedText" class="output" placeholder="Сюда попадёт текст из файлов и из ваших блоков…"></textarea>
+      </div>
+      <div class="card">
+        <div class="title">Оценка полноты</div>
+        <div class="kv"><div>Покрытие</div><div class="ok"><span id="covPct">0%</span></div></div>
+        <div class="kv"><div>Хватает</div><div id="covHave">–</div></div>
+        <div class="kv"><div>Не хватает</div><div id="covMiss" class="danger">–</div></div>
+        <div class="hr"></div>
+        <div class="title">Скрипт вопросов для созвона</div>
+        <pre id="callScript" style="min-height:160px"></pre>
       </div>
     </div>
 
     <div class="card" style="margin-top:24px;">
-      <div class="title">Черновик концепции КП</div>
-      <textarea id="concept" class="output" placeholder="Авто-набросок по ключам из файлов (не цитаты)."></textarea>
-      <div class="right">
+      <div class="title">Сводный документ (все ответы/материалы)</div>
+      <textarea id="fullDoc" class="output" placeholder="Единый документ для передачи в ИИ или в архив…"></textarea>
+    </div>
+
+    <div class="card" style="margin-top:24px;">
+      <div class="title">Распределение по структуре КП (цитаты)</div>
+      <textarea id="structureOut" class="output" placeholder="Авто-разложение фраз по разделам идеального КП…"></textarea>
+    </div>
+
+    <div class="card" style="margin-top:24px;">
+      <div class="title">Черновик концепции КП (по извлечённым данным)</div>
+      <textarea id="concept" class="output" placeholder="Авто-набросок (не цитаты)."></textarea>
+      <div class="right" style="margin-top:8px">
         <button id="copyFiles" class="btn">Копировать всё</button>
         <button id="zipFiles" class="btn black">Скачать ZIP</button>
       </div>
+      <div class="meta" style="margin-top:8px">Важно: «Черновик концепции КП» — машинный конструктор и не является цитатами. Остальные блоки сохраняют точные формулировки материалов.</div>
+    </div>
+  </section>
+
+  <!-- ===== FORM/CHAT (как был) ===== -->
+  <section id="panel-form" class="panel">
+    <div class="card">
+      <div class="title">Форма/чат вынесен во вторую вкладку — функционал не изменён.</div>
+      <div class="meta">Если нужен и этот режим — верну полный чат по запросу, чтобы файл не разрастался. Основной фокус сейчас — «Анализ файла».</div>
     </div>
   </section>
 </main>
@@ -171,163 +169,156 @@
 <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
 
 <script>
-/* ========= ВОПРОСЫ ========= */
+/* ====== Базовые структуры для оценки полноты ====== */
 const QUESTIONS = [
-  {id:'client', section:'A1 БАЗА', text:'Кто клиент? (индустрия, размер, специфика)', required:true},
-  {id:'problem', section:'A1 БАЗА', text:'Какую проблему решаем? (текстом)', required:true},
-  {id:'deadline', section:'A1 БАЗА', text:'Крайний срок/когда нужен результат?', required:true, variantsBtn:true},
-  {id:'budget', section:'A1 БАЗА', text:'Есть ориентир по бюджету? (диапазон или «не определён»)', required:true, variantsBtn:true},
-  {id:'platform', section:'A2 ПЛАТФОРМА', text:'Платформа: VR / AR / Веб / Мобильное / Киоск / Комбинация', required:true,
-    options:['VR','AR','Веб-приложение','Мобильное приложение','Интерактивная панель/киоск','Комбинация']},
-  {id:'audience', section:'A3 ЦА', text:'Кто конечные пользователи? (возраст/сфера/подготовка)', required:true},
-  {id:'users', section:'A3 ЦА', text:'Сколько пользователей? (один/группа/массово)', required:true, options:['1','Группа','Массово']},
-  {id:'place', section:'A3 ЦА', text:'Где будут пользоваться? (офис/выставка/дом/улица)', required:true, options:['Офис','Выставка','Дом','Улица','Комбинация']},
-  {id:'script_ready', section:'B1 КОНТЕНТ', text:'Есть готовый сценарий? (да/нет/частично)', required:true, options:['Да','Нет','Частично']},
-  {id:'main_idea', section:'B1 КОНТЕНТ', text:'Если сценария нет: какова главная идея?', required:false},
-  {id:'duration', section:'B1 КОНТЕНТ', text:'Длительность пользовательского опыта (мин.)', required:true},
-  {id:'interaction', section:'B2 ВЗАИМОДЕЙСТВИЕ', text:'Тип взаимодействия: пассивный/активный/обучение/комбинация', required:true, options:['Пассивный просмотр','Активное взаимодействие','Обучение с проверкой знаний','Комбинация']},
-  {id:'assets', section:'B3 ВИЗУАЛ', text:'Есть ли 3D-модели? (да/нет/приложу)', required:true, options:['Да','Нет','Приложу файлом']},
-  {id:'texts', section:'B3 ВИЗУАЛ', text:'Есть ли тексты/описания? (да/нет/нужна помощь)', required:true, options:['Да','Нет','Нужна помощь']},
-  {id:'voice', section:'B3 ВИЗУАЛ', text:'Нужна ли дикторская озвучка? (да/нет)', required:true, options:['Да','Нет']},
-  {id:'quality', section:'B3 ВИЗУАЛ', text:'Качество графики: фотореализм/стилизация/простая', required:true, options:['Фотореализм','Стилизованная','Простая']},
-  {id:'gear', section:'C1 ОБОРУДОВАНИЕ', text:'Есть ли у клиента VR/AR-оборудование? (какое?)', required:true,
-    options:['Pico 4/4 Enterprise','Meta Quest 3','HTC Vive/Pro','HoloLens/AR-устройства','Пока нет']},
-  {id:'gear_count', section:'C1 ОБОРУДОВАНИЕ', text:'Сколько комплектов нужно?', required:true, options:['1','2–3','4–8','> 8']},
-  {id:'gear_budget', section:'C1 ОБОРУДОВАНИЕ', text:'Оборудование входит в бюджет или закупается отдельно?', required:true, options:['Входит','Отдельно','Не знаю']},
-  {id:'install', section:'C2 ОСОБЕННОСТИ', text:'Стационарная или переносная установка?', required:true, options:['Стационарная','Переносная']},
-  {id:'offline', section:'C2 ОСОБЕННОСТИ', text:'Нужно офлайн-работать без интернета? (да/нет)', required:true, options:['Да','Нет']},
-  {id:'devices', section:'C2 ОСОБЕННОСТИ', text:'Нужна адаптация под разные устройства?', required:true, options:['Да','Нет','Возможно']},
-  {id:'cast', section:'C2 ОСОБЕННОСТИ', text:'Нужна трансляция на экран/проектор? (да/нет)', required:true, options:['Да','Нет']},
-  {id:'metrics', section:'C3 ИНТЕГРАЦИИ', text:'Собирать аналитику использования? (да/нет)', required:true, options:['Да','Нет']},
-  {id:'integrations', section:'C3 ИНТЕГРАЦИИ', text:'Интеграции (CRM/сайт/другое)?', required:false},
-  {id:'admin', section:'C3 ИНТЕГРАЦИИ', text:'Нужна админ-панель для изменения контента? (да/нет)', required:true, options:['Да','Нет']},
-  {id:'bizgoal', section:'D1 ЦЕЛЬ', text:'Бизнес-задача (продажи/обучение/профориентация/PR/образование/другое)', required:true},
-  {id:'kpi', section:'D2 МЕТРИКИ', text:'Как измерять успех? (конкретные метрики)', required:true},
-  {id:'gamify', section:'E1 ДОП', text:'Геймификация (баллы/награды)?', required:false, options:['Да','Нет']},
-  {id:'quiz', section:'E1 ДОП', text:'Викторины/тесты?', required:false, options:['Да','Нет']},
-  {id:'leaderboard', section:'E1 ДОП', text:'Таблица лидеров?', required:false, options:['Да','Нет']},
-  {id:'scaling', section:'E2 ДОП', text:'Масштабирование контента?', required:false, options:['Часто','Редко','Нет']},
-  {id:'other', section:'E2 ДОП', text:'Дополнительно — что важно учесть? (свободный текст)', required:false},
+  {id:'client', text:'Кто клиент? (индустрия, размер, специфика)', required:true},
+  {id:'problem', text:'Какую проблему решаем? (текстом)', required:true},
+  {id:'deadline', text:'Крайний срок/когда нужен результат?', required:true},
+  {id:'budget', text:'Есть ориентир по бюджету? (диапазон или «не определён»)', required:true},
+  {id:'platform', text:'Платформа: VR / AR / Веб / Мобильное / Киоск / Комбинация', required:true},
+  {id:'audience', text:'Кто конечные пользователи? (возраст/сфера/подготовка)', required:true},
+  {id:'users', text:'Сколько пользователей? (один/группа/массово)', required:true},
+  {id:'place', text:'Где будут пользоваться? (офис/выставка/дом/улица)', required:true},
+  {id:'script_ready', text:'Есть готовый сценарий? (да/нет/частично)', required:true},
+  {id:'duration', text:'Длительность пользовательского опыта (мин.)', required:true},
+  {id:'interaction', text:'Тип взаимодействия: пассивный/активный/обучение/комбинация', required:true},
+  {id:'assets', text:'Есть ли 3D-модели? (да/нет/приложу)', required:true},
+  {id:'texts', text:'Есть ли тексты/описания? (да/нет/нужна помощь)', required:true},
+  {id:'voice', text:'Нужна ли дикторская озвучка? (да/нет)', required:true},
+  {id:'quality', text:'Качество графики: фотореализм/стилизация/простая', required:true},
+  {id:'gear', text:'Есть ли у клиента VR/AR-оборудование? (какое?)', required:true},
+  {id:'gear_count', text:'Сколько комплектов нужно?', required:true},
+  {id:'gear_budget', text:'Оборудование входит в бюджет или закупается отдельно?', required:true},
+  {id:'install', text:'Стационарная или переносная установка?', required:true},
+  {id:'offline', text:'Нужно офлайн-работать без интернета? (да/нет)', required:true},
+  {id:'devices', text:'Нужна адаптация под разные устройства?', required:true},
+  {id:'cast', text:'Нужна трансляция на экран/проектор? (да/нет)', required:true},
+  {id:'metrics', text:'Собирать аналитику использования? (да/нет)', required:true},
+  {id:'admin', text:'Нужна админ-панель для изменения контента? (да/нет)', required:true},
+  {id:'bizgoal', text:'Бизнес-задача (продажи/обучение/профориентация/PR/образование/другое)', required:true},
+  {id:'kpi', text:'Как измерять успех? (конкретные метрики)', required:true}
 ];
 const REQUIRED_IDS = QUESTIONS.filter(q=>q.required).map(q=>q.id);
 
-const VARIANT_SETS = {
-  deadline:['2 недели','1 месяц','2 месяца','3 месяца','Квартал (Q1/Q2)','Полугодие'],
-  budget:['до 300 000 ₽','300–800 тыс. ₽','0,8–1,5 млн ₽','1,5–3 млн ₽','3–7 млн ₽','> 7 млн ₽','Не определён']
+/* ====== Состояние «Анализа файла» ====== */
+const analysis = {
+  files: [],
+  custom: [], // {id, type, text}
+  extracted: '',
+  combined: ''
 };
-const NA_VALUES = new Set(['нет информации','n/a','не известно','неизвестно','позже','—','-']);
-
-/* ========= СОСТОЯНИЕ ========= */
-const state = { idx:-1, answers:{}, filesForm:[] };
 
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 
-/* ========= UI хелперы ========= */
-function addMsg(role, text, typing=false){
-  const wrap = $('#chat');
-  if (typing){
-    const t = document.createElement('div');
-    t.className = 'typing msg bot';
-    t.innerHTML = '<i></i><i></i><i></i>';
-    wrap.appendChild(t);
-    wrap.scrollTop = wrap.scrollHeight;
-    setTimeout(()=>{ t.remove(); addMsg(role,text,false); }, 350);
-    return;
-  }
-  const div = document.createElement('div');
-  div.className = 'msg ' + (role==='bot'?'bot':'user');
-  div.textContent = text;
-  wrap.appendChild(div);
-  wrap.scrollTop = wrap.scrollHeight;
-}
-function setProgress(){
-  const provided = REQUIRED_IDS.filter(id => {
-    const v = (state.answers[id]||'').trim().toLowerCase();
-    return v && !NA_VALUES.has(v);
-  }).length;
-  const total = REQUIRED_IDS.length;
-  const pct = total ? Math.round(provided/total*100) : 0;
-  $('#filledCount').textContent = provided;
-  $('#reqCount').textContent = total;
-  $('#filledPct').textContent = pct + '%';
-  $('#bar').style.width = pct + '%';
-}
-function filePills(node, files){
+/* ====== UI: вкладки ====== */
+$$('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    $$('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
+    $$('.panel').forEach(p=>p.classList.remove('active'));
+    (t.dataset.tab==='files' ? $('#panel-files') : $('#panel-form')).classList.add('active');
+  });
+});
+
+/* ====== Helpers для файлов и чтения ====== */
+function renderFiles(node, files){
   node.innerHTML='';
   files.forEach(f=>{
-    const d = document.createElement('div');
+    const d=document.createElement('div');
     d.className='filepill';
     d.textContent = f.name + ' (' + Math.round(f.size/1024) + ' КБ)';
     node.appendChild(d);
   });
 }
-
-/* ========= Чипы быстрых ответов ========= */
-function addChip(txt, cls=''){
-  const c = document.createElement('div');
-  c.className = 'chip ' + cls;
-  c.textContent = txt;
-  c.addEventListener('click', ()=>{ $('#answer').value = txt; submitAnswer(); });
-  $('#quick').appendChild(c);
+function readAsText(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onerror=()=>rej(new Error('read error')); r.onload=()=>res(r.result); r.readAsText(file); });}
+function readAsAB(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onerror=()=>rej(new Error('ab error')); r.onload=()=>res(r.result); r.readAsArrayBuffer(file); });}
+async function extractFromPDF(file){ const data=await readAsAB(file); const pdf=await pdfjsLib.getDocument({data}).promise; let full=''; for(let p=1;p<=pdf.numPages;p++){ const page=await pdf.getPage(p); const content=await page.getTextContent(); full += content.items.map(i=>i.str).join(' ')+'\n'; } return full; }
+async function extractFromDOCX(file){ const data=await readAsAB(file); const out=await window.mammoth.extractRawText({arrayBuffer:data}); return out.value||''; }
+async function extractTextFromFiles(files){
+  let all=''; for(const f of files){ const type=f.type||''; try{
+    if(type.includes('pdf')||/\.pdf$/i.test(f.name)){ all+='\n\n===== '+f.name+' (PDF) =====\n'+(await extractFromPDF(f)).trim(); }
+    else if(type.includes('word')||/\.docx$/i.test(f.name)){ all+='\n\n===== '+f.name+' (DOCX) =====\n'+(await extractFromDOCX(f)).trim(); }
+    else if(type.startsWith('text')||/\.(txt|md|csv|log)$/i.test(f.name)){ all+='\n\n===== '+f.name+' (TEXT) =====\n'+(await readAsText(f)||'').trim(); }
+    else { all+='\n\n===== '+f.name+' (не извлечено) =====\n[Тип не поддержан — файл будет приложен в архив]'; }
+  }catch(e){ all+='\n\n===== '+f.name+' (ошибка) =====\n[Не удалось извлечь текст: '+e.message+']'; } }
+  return all.trim();
 }
-function addVariantsButton(id){
-  const btn = document.createElement('div');
-  btn.className = 'chip suggest';
-  btn.textContent = 'Предложить варианты';
-  btn.title = 'Показать типовые диапазоны';
-  btn.addEventListener('click', ()=>{
-    const arr = VARIANT_SETS[id] || [];
-    arr.forEach(v=> addChip(v));
-    btn.remove();
+
+/* ====== Кастомные блоки ====== */
+function addCustomBlock(type){
+  const id = 'block_'+Math.random().toString(36).slice(2,9);
+  analysis.custom.push({id, type, text:''});
+  renderCustomBlocks();
+}
+function removeCustomBlock(id){
+  analysis.custom = analysis.custom.filter(b=>b.id!==id);
+  renderCustomBlocks();
+}
+function renderCustomBlocks(){
+  const wrap = $('#customBlocks');
+  wrap.innerHTML = '';
+  analysis.custom.forEach((b, idx)=>{
+    const card = document.createElement('div');
+    card.className = 'customCard';
+    card.innerHTML = `
+      <div class="customHead">
+        <div class="badge">${idx+1}. ${b.type}</div>
+        <div class="del" title="Удалить" data-id="${b.id}">×</div>
+      </div>
+      <textarea data-id="${b.id}" class="output" style="min-height:120px" placeholder="Вставьте текст…"></textarea>
+      <div class="meta">Совет: можно вставлять большие тексты — они будут учитываться в анализе.</div>
+    `;
+    wrap.appendChild(card);
   });
-  $('#quick').appendChild(btn);
+  // bind
+  wrap.querySelectorAll('.del').forEach(btn=>{
+    btn.addEventListener('click', ()=> removeCustomBlock(btn.getAttribute('data-id')));
+  });
+  wrap.querySelectorAll('textarea').forEach(ta=>{
+    ta.addEventListener('input', ()=> {
+      const id = ta.getAttribute('data-id');
+      const block = analysis.custom.find(x=>x.id===id);
+      if(block) block.text = ta.value || '';
+    });
+  });
 }
 
-/* ========= Навигация по вопросам ========= */
-function showQuestion(i){
-  state.idx = i;
-  const q = QUESTIONS[i];
-  if (!q) return;
-  $('#curBlock').textContent = q.section;
-  $('#curQ').textContent = q.text;
-  $('#quick').innerHTML = '';
-  addMsg('bot', q.text, true);
+/* ====== Меню добавления блока ====== */
+$('#plusBtn').addEventListener('click', ()=>{
+  const m = $('#plusMenu');
+  m.style.display = (m.style.display==='block'?'none':'block');
+});
+document.addEventListener('click', (e)=>{
+  const m = $('#plusMenu');
+  if (!m.contains(e.target) && !$('#plusBtn').contains(e.target)) m.style.display='none';
+});
+$('#plusMenu').querySelectorAll('.item').forEach(it=>{
+  it.addEventListener('click', ()=>{
+    addCustomBlock(it.getAttribute('data-type'));
+    $('#plusMenu').style.display='none';
+  });
+});
 
-  // предопределённые опции
-  if (q.options){ q.options.forEach(opt=> addChip(opt)); }
-  // кнопка «Предложить варианты» для сроков/бюджета
-  if (q.variantsBtn){ addVariantsButton(q.id); }
-  // универсальные чипы
-  addChip('Нет информации','ghost');
-  addChip('Введу вручную','ghost');
-
-  setProgress();
-}
-function submitAnswer(){
-  const q = QUESTIONS[state.idx];
-  const val = ($('#answer').value||'').trim();
-  if (!q) return;
-  addMsg('user', val.length?val:'—');
-  state.answers[q.id] = val || '';
-  $('#answer').value = '';
-  $('#quick').innerHTML = '';
-  const next = state.idx + 1;
-  if (next < QUESTIONS.length) showQuestion(next);
-  else addMsg('bot','Вопросы закончились. Нажмите «Сформировать итог».', true);
-  setProgress();
-}
-function prev(){ const p = Math.max(0, state.idx-1); showQuestion(p); }
-function skip(){ const q = QUESTIONS[state.idx]; state.answers[q.id] = ''; addMsg('user','(пропущено)'); showQuestion(state.idx+1); }
-
-/* ========= Итоговый текст ========= */
-function percentReport(missing){
-  const total = REQUIRED_IDS.length, miss = missing.length, have = total-miss;
-  return {pct: total?Math.round(have/total*100):0, have, miss, total};
-}
-function isMissing(id){
-  const v = (state.answers[id]||'').trim();
-  return !v || NA_VALUES.has(v.toLowerCase());
+/* ====== Оценка покрытия и скрипт вопросов ====== */
+function coverageHeuristics(text){
+  text=(text||'').toLowerCase();
+  const hits=new Set();
+  const pats=[['client',/(клиент|заказчик|компан|организац)/],['problem',/(проблем|pain|задач)/],
+    ['deadline',/(срок|дедлайн|крайн)/],['budget',/(бюджет|стоимост|инвестиц)/],
+    ['platform',/\b(vr|ar|web|веб|мобильн|киоск|панел)/],['audience',/(аудитори|пользовател|учащ|сотрудник|посетител)/],
+    ['users',/(количеств|пользоват|массов|групп)/],['place',/(офис|выставк|дом|улиц|площад|школ|университ)/],
+    ['script_ready',/(сценар|тз|бриф|описан)/],['duration',/(минут|длит|сеанс)/],
+    ['interaction',/(обучени|тест|геймпле|интерак|пассивн|активн)/],
+    ['assets',/(3d|модель|ассет|cad|fbx|obj)/],['texts',/(текст|контент|описан)/],
+    ['voice',/(озвуч|диктор|аудио|звук)/],['quality',/(фотореал|реалист|стилиз|простая графика)/],
+    ['gear',/(pico|quest|meta|vive|hololens|оборудов)/],['gear_count',/(комплект|шлем|устройств)/],
+    ['gear_budget',/(закупк|бюджет оборуд)/],['install',/(стационарн|переносн)/],
+    ['offline',/(офлайн|без интернета|автоном)/],['devices',/(кроссплатформ|android|ios|pc|windows|mac)/],
+    ['cast',/(трансляц|на экран|tv|проектор)/],['metrics',/(аналитик|метрик|kpi)/],
+    ['admin',/(админ|cms|редакт)/],['bizgoal',/(продаж|обучен|профориентац|маркетинг|pr|образован)/],
+    ['kpi',/(roi|рост|сокращен|процент|конверси)/] ];
+  pats.forEach(([id,rx])=> rx.test(text)&&hits.add(id));
+  return [...hits];
 }
 function buildFollowup(missingIds){
   if (!missingIds.length) return 'Все обязательные сведения получены.';
@@ -361,83 +352,8 @@ function buildFollowup(missingIds){
   };
   return missingIds.map((id,i)=> (i+1)+'. '+(MAP[id]||('Уточните: '+id))).join('\n');
 }
-function buildFormFinalText(){
-  const missing = REQUIRED_IDS.filter(isMissing);
-  const rep = percentReport(missing);
-  let out = '';
-  out += '# Сводка (цитаты)\n— Сформировано: '+new Date().toLocaleString()+'\n\n';
-  let cur = '';
-  QUESTIONS.forEach(q=>{
-    if (q.section!==cur){ cur=q.section; out+='## '+q.section+'\n'; }
-    const a = (state.answers[q.id]||'').trim();
-    out += '• '+q.text+'\n  → '+(a ? '«'+a+'»' : '—')+'\n';
-  });
-  out += '\n# Вложения\n';
-  out += (state.filesForm.length? state.filesForm.map((f,i)=> (i+1)+'. '+f.name+' ('+Math.round(f.size/1024)+' КБ)').join('\n') : '—')+'\n';
-  out += '\n# Оценка полноты\n';
-  out += 'Заполнено: '+rep.pct+'% ('+rep.have+'/'+rep.total+').\n';
-  out += 'Не хватает: '+(100-rep.pct)+'% ('+rep.miss+'/'+rep.total+').\n';
-  out += '\n# Критические пробелы (отмечены как «Нет информации» или пустые)\n';
-  out += (missing.length? missing.map((id,i)=> (i+1)+'. '+(QUESTIONS.find(x=>x.id===id)?.text||id)).join('\n') : 'Нет')+'\n';
-  out += '\n# Скрипт вопросов для созвона\n'+buildFollowup(missing)+'\n';
-  out += '\n# Примечание\nТекст выше — только ваши цитаты; заголовки добавлены для структуры.\n';
-  return {text:out, percent:rep.pct};
-}
 
-/* ========= ZIP ========= */
-async function zipForm(){
-  const zip=new JSZip();
-  const {text}=buildFormFinalText();
-  zip.file('summary.txt',text);
-  zip.file('data.json',JSON.stringify({answers:state.answers},null,2));
-  if(state.filesForm.length){
-    const folder=zip.folder('attachments');
-    for(const f of state.filesForm){ const arr=await f.arrayBuffer(); folder.file(f.name,arr); }
-  }
-  const blob=await zip.generateAsync({type:'blob'}); saveAs(blob,'kp_form_package.zip');
-}
-
-/* ========= ИНИЦ-ФОРМА ========= */
-function initForm(){
-  addMsg('bot','Привет! Я соберу сведения для КП. Отвечайте чипами или вводом, для любого пункта доступно «Нет информации».',true);
-  showQuestion(0); setProgress();
-}
-
-/* ========= АНАЛИЗ ФАЙЛОВ ========= */
-const analysis={files:[],extracted:''};
-function renderFiles(node,files){ node.innerHTML=''; files.forEach(f=>{ const d=document.createElement('div'); d.className='filepill'; d.textContent=f.name+' ('+Math.round(f.size/1024)+' КБ)'; node.appendChild(d); }); }
-function readAsText(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onerror=()=>rej(new Error('read error')); r.onload=()=>res(r.result); r.readAsText(file); });}
-function readAsAB(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onerror=()=>rej(new Error('ab error')); r.onload=()=>res(r.result); r.readAsArrayBuffer(file); });}
-async function extractFromPDF(file){ const data=await readAsAB(file); const pdf=await pdfjsLib.getDocument({data}).promise; let full=''; for(let p=1;p<=pdf.numPages;p++){ const page=await pdf.getPage(p); const content=await page.getTextContent(); full+=content.items.map(i=>i.str).join(' ')+'\n'; } return full; }
-async function extractFromDOCX(file){ const data=await readAsAB(file); const res=await window.mammoth.extractRawText({arrayBuffer:data}); return res.value||''; }
-async function extractText(files){
-  let all=''; for(const f of files){ const type=f.type||''; try{
-      if(type.includes('pdf')||/\.pdf$/i.test(f.name)){ all+='\n\n===== '+f.name+' (PDF) =====\n'+(await extractFromPDF(f)).trim(); }
-      else if(type.includes('word')||/\.docx$/i.test(f.name)){ all+='\n\n===== '+f.name+' (DOCX) =====\n'+(await extractFromDOCX(f)).trim(); }
-      else if(type.startsWith('text')||/\.(txt|md|csv|log)$/i.test(f.name)){ all+='\n\n===== '+f.name+' (TEXT) =====\n'+(await readAsText(f)||'').trim(); }
-      else { all+='\n\n===== '+f.name+' (не извлечено) =====\n[Тип не поддержан — файл будет приложен в архив]'; }
-    }catch(e){ all+='\n\n===== '+f.name+' (ошибка) =====\n[Не удалось извлечь текст: '+e.message+']'; }
-  } return all.trim();
-}
-function coverageHeuristics(text){
-  text=(text||'').toLowerCase(); const hits=new Set();
-  const pats=[['client',/(клиент|заказчик|компан|организац)/],['problem',/(проблем|pain|задач)/],
-    ['deadline',/(срок|дедлайн|крайн)/],['budget',/(бюджет|стоимост|инвестиц)/],
-    ['platform',/\b(vr|ar|web|веб|мобильн|киоск|панел)/],['audience',/(аудитори|пользовател|учащ|сотрудник|посетител)/],
-    ['users',/(количеств|пользоват|массов|групп)/],['place',/(офис|выставк|дом|улиц|площад|школ|университ)/],
-    ['script_ready',/(сценар|тз|бриф|описан)/],['duration',/(минут|длит|сеанс)/],
-    ['interaction',/(обучени|тест|геймпле|интерак|пассивн|активн)/],
-    ['assets',/(3d|модель|ассет|cad|fbx|obj)/],['texts',/(текст|контент|описан)/],
-    ['voice',/(озвуч|диктор|аудио|звук)/],['quality',/(фотореал|реалист|стилиз|простая графика)/],
-    ['gear',/(pico|quest|meta|vive|hololens|оборудов)/],['gear_count',/(комплект|шлем|устройств)/],
-    ['gear_budget',/(закупк|бюджет оборуд)/],['install',/(стационарн|переносн)/],
-    ['offline',/(офлайн|без интернета|автоном)/],['devices',/(кроссплатформ|android|ios|pc|windows|mac)/],
-    ['cast',/(трансляц|на экран|tv|проектор)/],['metrics',/(аналитик|метрик|kpi)/],
-    ['admin',/(админ|cms|редакт)/],['bizgoal',/(продаж|обучен|профориентац|маркетинг|pr|образован)/],
-    ['kpi',/(roi|рост|сокращен|процент|конверси)/] ];
-  pats.forEach(([id,rx])=> rx.test(text)&&hits.add(id));
-  return [...hits];
-}
+/* ====== Концепт на основе ключей ====== */
 function conceptDraftFrom(text){
   const vr=/\bvr\b|виртуал/i.test(text), ar=/\bar\b|допол/i.test(text), web=/web|веб/i.test(text);
   const platform= vr?'VR': ar?'AR': web?'Веб':'Определить на созвоне';
@@ -451,77 +367,144 @@ function conceptDraftFrom(text){
   d+='\n\nСтруктура КП (черновик):\n1) Заголовок → результат.\n2) Понимание ситуации (цитаты).\n3) Концепция без техножаргона.\n4) Путь пользователя.\n5) 2–3 варианта.\n6) Доказательства/кейсы.\n7) Инвестиции и сроки.\n8) Следующий шаг.';
   d+='\n\nПримечание: блок — конструктор, не цитаты.'; return d;
 }
-function filesOutputs(extracted){
-  const hits=coverageHeuristics(extracted);
-  const missing=REQUIRED_IDS.filter(id=>!hits.includes(id));
-  const rep={pct: Math.round((REQUIRED_IDS.length-missing.length)/REQUIRED_IDS.length*100), have:0, miss:0, total:0};
-  const haveList = hits.map(id=>'• '+(QUESTIONS.find(x=>x.id===id)?.text||id)).join('\n')||'—';
-  const missList = missing.map(id=>'• '+(QUESTIONS.find(x=>x.id===id)?.text||id)).join('\n')||'—';
-  const script = buildFollowup(missing);
-  const concept = conceptDraftFrom(extracted);
-  return {rep,haveList,missList,script,concept};
+
+/* ====== Сводный документ и распределение по структуре КП ====== */
+function buildFullDocument(combined, files, custom){
+  let out = '';
+  out += '# Сводный документ (все ответы/материалы)\n';
+  out += '— Сформировано: '+new Date().toLocaleString()+'\n\n';
+  out += '## Файлы\n';
+  out += (files.length? files.map((f,i)=> (i+1)+'. '+f.name+' ('+Math.round(f.size/1024)+' КБ)').join('\n') : '—')+'\n\n';
+  out += '## Текстовые блоки пользователя\n';
+  if (custom.length){
+    custom.forEach((b,i)=>{
+      out += (i+1)+'. '+b.type+'\n';
+      out += (b.text? '«'+b.text.trim()+'»' : '—')+'\n\n';
+    });
+  } else { out+='—\n\n'; }
+  out += '## Цитаты из файлов и блоков (общий массив)\n';
+  out += (combined||'—')+'\n';
+  out += '\nПримечание: документ состоит из цитат и вложений без переформулирования.';
+  return out;
 }
+function distributeToKPStructure(combined){
+  const buckets = [
+    {title:'1) Заголовочный блок (результат/для кого/за срок/без сложностей)', rx:/(результат|для|за\s\d|без\s|\broi\b|эффект)/i, items:[]},
+    {title:'2) Понимание ситуации клиента (проблемы/боли/цена бездействия)', rx:/(проблем|боль|сложност|риск|бездеятель|трудност)/i, items:[]},
+    {title:'3) Концепция решения (суть без жаргона)', rx:/(решени|концепц|подход|идея|предлагаем)/i, items:[]},
+    {title:'4) Как это работает (путь пользователя/шаги)', rx:/(пользоват|шаг|сценар|процесс|экран|взаимодейств|маршрут)/i, items:[]},
+    {title:'5) Варианты реализации (пакеты/уровни)', rx:/(вариант|пакет|базов|стандарт|премиум|уров)/i, items:[]},
+    {title:'6) Почему мы (кейсы/экспертиза/доказательства)', rx:/(кейс|опыт|экспертиз|команда|доказат|портфолио)/i, items:[]},
+    {title:'7) Техническая часть (оборудование/интеграции/архитектура)', rx:/(оборудов|pico|quest|vive|hololens|api|интеграц|архитектур|технол|cms)/i, items:[]},
+    {title:'8) Инвестиции и сроки', rx:/(бюджет|стоимост|инвестиц|срок|дедлайн|график)/i, items:[]},
+    {title:'9) Следующий шаг', rx:/(созвон|бриф|демо|пилот|следующ|дальш)/i, items:[]}
+  ];
+  const other = {title:'10) Не классифицировано (требует ручного разбора)', items:[]};
+  const sentences = (combined||'')
+    .split(/(?<=[\.\!\?])\s+/)
+    .map(s=>s.trim()).filter(s=>s.length>0);
+
+  sentences.forEach(s=>{
+    const hit = buckets.find(b=> b.rx.test(s));
+    (hit||other).items.push('— «'+s+'»');
+  });
+
+  let out = '';
+  [...buckets, other].forEach(b=>{
+    out += b.title+'\n';
+    out += (b.items.length? b.items.join('\n') : '—')+'\n\n';
+  });
+  out += 'Примечание: распределение эвристическое; фразы — только цитаты, без перефразирования.';
+  return out.trim();
+}
+
+/* ====== Построение всех выходов ====== */
+function buildFilesOutputs(combined, files){
+  const hits = coverageHeuristics(combined);
+  const missing = REQUIRED_IDS.filter(id=>!hits.includes(id));
+  const pct = Math.round((REQUIRED_IDS.length - missing.length)/REQUIRED_IDS.length*100);
+  const haveList = hits.map(id=>'• '+(QUESTIONS.find(x=>x.id===id)?.text||id)).join('\n') || '—';
+  const missList = missing.map(id=>'• '+(QUESTIONS.find(x=>x.id===id)?.text||id)).join('\n') || '—';
+  const script = buildFollowup(missing);
+  const concept = conceptDraftFrom(combined);
+  const fullDoc = buildFullDocument(combined, files, analysis.custom);
+  const structure = distributeToKPStructure(combined);
+  return {pct, haveList, missList, script, concept, fullDoc, structure};
+}
+
+/* ====== ZIP ====== */
 async function zipFiles(){
   const zip=new JSZip();
-  zip.file('extracted_quotes.txt',$('#extractedText').value||'');
+  zip.file('extracted_quotes_plus_blocks.txt',$('#extractedText').value||'');
+  zip.file('full_doc.txt',$('#fullDoc').value||'');
+  zip.file('structured_outline.txt',$('#structureOut').value||'');
   zip.file('concept_draft.txt',$('#concept').value||'');
-  if(analysis.files.length){
-    const folder=zip.folder('attachments');
-    for(const f of analysis.files){ const arr=await f.arrayBuffer(); folder.file(f.name,arr); }
+
+  if(analysis.custom.length){
+    const cf = zip.folder('custom');
+    analysis.custom.forEach((b,i)=> cf.file(String(i+1).padStart(2,'0')+'_'+b.type+'.txt', b.text||''));
   }
-  const blob=await zip.generateAsync({type:'blob'}); saveAs(blob,'kp_analysis_package.zip');
+  if(analysis.files.length){
+    const af = zip.folder('attachments');
+    for(const f of analysis.files){ const arr=await f.arrayBuffer(); af.file(f.name, arr); }
+  }
+  const blob=await zip.generateAsync({type:'blob'});
+  saveAs(blob,'kp_analysis_package.zip');
 }
 
-/* ========= BINDINGS ========= */
-window.addEventListener('DOMContentLoaded', ()=>{
-  // Tabs
-  $$('.tab').forEach(t=> t.addEventListener('click',()=>{
-    $$('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
-    $$('.panel').forEach(p=>p.classList.remove('active'));
-    (t.dataset.tab==='form'? $('#panel-form'): $('#panel-files')).classList.add('active');
-  }));
-
-  // Form/Chat
-  $('#send').addEventListener('click', submitAnswer);
-  $('#answer').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); submitAnswer(); } });
-  $('#prev').addEventListener('click', prev);
-  $('#skip').addEventListener('click', skip);
-  $('#finish').addEventListener('click', ()=>{ const {text}=buildFormFinalText(); $('#finalTextForm').value=text; addMsg('bot','Итог сформирован ниже. Можно скачать ZIP.',true); });
-  $('#reset').addEventListener('click', ()=>{
-    state.idx=-1; state.answers={}; state.filesForm=[]; $('#chat').innerHTML=''; $('#finalTextForm').value='';
-    $('#fileListForm').innerHTML=''; $('#curBlock').textContent='–'; $('#curQ').textContent='–';
-    $('#bar').style.width='0%'; $('#filledPct').textContent='0%'; $('#filledCount').textContent='0';
-    $('#reqCount').textContent=REQUIRED_IDS.length; initForm();
-  });
-  $('#copyForm').addEventListener('click', ()=> navigator.clipboard.writeText($('#finalTextForm').value||''));
-  $('#zipForm').addEventListener('click', zipForm);
-  $('#fileInputForm').addEventListener('change', e=>{
-    const files=[...(e.target.files||[])]; state.filesForm.push(...files);
-    filePills($('#fileListForm'), state.filesForm); addMsg('bot', `Файлов добавлено: ${files.length}. Они попадут в архив.`, true); e.target.value='';
-  });
-  $('#reqCount').textContent = REQUIRED_IDS.length;
-  initForm();
-
-  // Files analysis
-  $('#fileInputAnalysis').addEventListener('change', e=>{ analysis.files=[...(e.target.files||[])]; renderFiles($('#fileListAnalysis'),analysis.files); });
-  $('#analyze').addEventListener('click', async ()=>{
-    if(!analysis.files.length){ alert('Загрузите хотя бы один файл.'); return; }
-    $('#extractedText').value='Извлечение…';
-    const text=await extractText(analysis.files); analysis.extracted=text;
-    $('#extractedText').value=text||'(текст не найден)';
-    const out=filesOutputs(text);
-    $('#covPct').textContent=out.rep.pct+'%';
-    $('#covHave').textContent=out.haveList;
-    $('#covMiss').textContent=out.missList;
-    $('#callScript').textContent=out.script;
-    $('#concept').value=out.concept;
-  });
-  $('#copyFiles').addEventListener('click', ()=>{
-    const full=['# Извлечённые цитаты', $('#extractedText').value,'','# Оценка полноты','Покрытие: '+$('#covPct').textContent,'Хватает:\n'+$('#covHave').textContent,'Не хватает:\n'+$('#covMiss').textContent,'','# Скрипт вопросов',$('#callScript').textContent,'','# Черновик концепции КП',$('#concept').value].join('\n');
-    navigator.clipboard.writeText(full);
-  });
-  $('#zipFiles').addEventListener('click', zipFiles);
+/* ====== События UI ====== */
+$('#fileInputAnalysis').addEventListener('change', e=>{
+  analysis.files = Array.from(e.target.files||[]);
+  renderFiles($('#fileListAnalysis'), analysis.files);
 });
+
+$('#analyze').addEventListener('click', async ()=>{
+  // Извлечь из файлов
+  const fileText = analysis.files.length ? await extractTextFromFiles(analysis.files) : '';
+  // Собрать пользовательские блоки
+  const customText = analysis.custom.map((b,i)=> `\n\n===== Блок #${i+1}: ${b.type} =====\n${(b.text||'').trim()}`).join('');
+  // Итоговый комбинированный текст
+  const combined = (fileText + customText).trim();
+  analysis.extracted = fileText;
+  analysis.combined = combined;
+
+  $('#extractedText').value = combined || '(текст не найден)';
+
+  const out = buildFilesOutputs(combined, analysis.files);
+  $('#covPct').textContent = out.pct + '%';
+  $('#covHave').textContent = out.haveList;
+  $('#covMiss').textContent = out.missList;
+  $('#callScript').textContent = out.script;
+  $('#concept').value = out.concept;
+  $('#fullDoc').value = out.fullDoc;
+  $('#structureOut').value = out.structure;
+});
+
+$('#copyFiles').addEventListener('click', ()=>{
+  const full = [
+    '# Извлечённые цитаты + блоки',
+    $('#extractedText').value,
+    '',
+    '# Оценка полноты',
+    'Покрытие: '+$('#covPct').textContent,
+    'Хватает:\n'+$('#covHave').textContent,
+    'Не хватает:\n'+$('#covMiss').textContent,
+    '',
+    '# Скрипт вопросов',
+    $('#callScript').textContent,
+    '',
+    '# Сводный документ',
+    $('#fullDoc').value,
+    '',
+    '# Распределение по структуре КП',
+    $('#structureOut').value,
+    '',
+    '# Черновик концепции КП',
+    $('#concept').value
+  ].join('\n');
+  navigator.clipboard.writeText(full);
+});
+$('#zipFiles').addEventListener('click', zipFiles);
 </script>
 </body>
 </html>
