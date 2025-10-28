@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>maestro.</title>
 <style>
   :root{
@@ -45,6 +45,8 @@
   .logoWrap{display:flex;justify-content:center;margin-bottom:16px}
   .logoWrap img{max-width:240px;opacity:.96;filter:drop-shadow(0 6px 30px #000a)}
   .hidden{display:none!important}
+  .out{white-space:pre-wrap;min-height:200px}
+  .copyRow{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:8px}
   @media (max-width:900px){ .kv{grid-template-columns:120px 1fr} }
 </style>
 </head>
@@ -69,40 +71,35 @@
     <div class="row" style="margin-top:8px">
       <input id="answerInput" type="text" placeholder="Напишите ответ и нажмите Enter">
       <button class="btn" id="sendAnswer">Ответить</button>
-      <button class="btn" id="buildDoc">Собрать DOCX</button>
-      <button class="btn" id="zipAll">ZIP</button>
+      <button class="btn" id="buildText">Собрать текст</button>
     </div>
     <div id="ideaBox" class="hidden" style="margin-top:8px">
-      <textarea id="ideaText" placeholder="Опишите идею — добавим в документ раздел «Моя идея»"></textarea>
+      <textarea id="ideaText" placeholder="Опишите идею — добавим в конец блока «Моя идея»"></textarea>
     </div>
     <div class="kv" style="margin-top:12px">
       <div class="muted">Статус</div><div id="status">ожидаю…</div>
       <div class="muted">Файлы</div><div id="files" class="files">—</div>
     </div>
   </section>
+
+  <section id="outSection" class="glass wrap hidden" style="margin-top:16px">
+    <p class="title">Итоговый текст (клик по полю копирует)</p>
+    <textarea id="finalText" class="out" rows="18" readonly></textarea>
+    <div class="copyRow">
+      <button class="btn" id="copyBtn">Скопировать</button>
+      <button class="btn" id="downloadTxt">Скачать .txt</button>
+    </div>
+  </section>
 </main>
 
-<!-- LIBS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<!-- Лёгкие либы только для извлечения текста из PDF/DOCX (если нужно подтягивать содержимое файлов) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.min.js"></script>
 <script>if(window['pdfjsLib']) pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.worker.min.js';</script>
 <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.7/dist/pizzip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.46.2/build/docxtemplater.js"></script>
 
 <script>
-/* ====== Конфиг шаблона ====== */
-const USE_EXTERNAL_DOCX_TEMPLATE = false; // true -> использовать template.docx с {answers},{docs},{ideas}
-const TPL_PATH = 'template.docx';
-
-// Вставь сюда ПОЛНЫЙ текст из «Шаблон для КП.docx», если не используешь внешний файл:
-const TEMPLATE_PROMPT_TEXT = `
-Универсальный промт для создания продающих коммерческих предложений
-[Вставь полный текст твоего шаблона. Он будет заголовком документа.
-Ниже автоматически добавятся секции: «Ответы из формы», «Информация из документов», «Моя идея».]
-`;
+/* ====== Конфиг заголовка ====== */
+const TEMPLATE_PROMPT_TEXT = `Универсальный промт для создания продающих коммерческих предложений\n[Ниже автоматически добавлены секции: «Ответы из формы», «Информация из документов», «Моя идея».]`;
 
 /* ====== Утилиты ====== */
 const $ = s => document.querySelector(s);
@@ -118,30 +115,25 @@ async function extractFromFiles(files){let out='';for(const f of files){try{
   else out+=`\n\n===== ${f.name} (не извлечено) =====\n[Тип не поддержан в браузере]`;
 } catch(e){ out+=`\n\n===== ${f.name} (ошибка) =====\n[${e.message}]`; } } return out.trim();}
 
-/* ====== Дерево вопросов (минимальный интерфейс; все из твоего текста) ====== */
+/* ====== Вопросы ====== */
 const Q = [
-  // A
   {id:'A1_company', q:'Расскажите о вашей компании — чем занимаетесь, в какой сфере работаете?', script:'*Начнем с вашего бизнеса. Расскажите, пожалуйста, сферу деятельности и масштаб.*',
     choices:['Промышленное производство','Недвижимость','Культурные учреждения','Образование','Нефтегаз/энергетика','Фармацевтика/медицина','Выставочная деятельность','Госструктуры (управление туризмом)']},
-  // B
   {id:'B1_problem', q:'Какую конкретную проблему или задачу хотите решить?', script:'*Какую проблему будем решать? Чем недовольны сейчас?*'},
   {id:'B2_conseq', q:'Какова цена бездействия? Что будет, если проблему не решать?', script:'*К каким потерям это приводит — деньги, кадры, имидж?*',
     choices:['Упущенная выручка/продажи','Потеря/дефицит кадров','Отставание от конкурентов','Снижение узнаваемости','Риски травматизма','Низкий охват целевой аудитории']},
   {id:'B3_tried', q:'Что уже пробовали? Почему не сработало?', script:'*Расскажите о прошлых попытках — что делали и почему не зашло?*'},
   {id:'B4_kpi', q:'По каким метрикам оценим успех?', script:'*Как поймёте, что проект сработал? Какие цифры хотите увидеть?*'},
-  // C
   {id:'C1_goal', q:'Какова основная цель проекта?', script:'*Выберите назначение — это задаст архитектуру решения.*',
     choices:['Обучение и тренировка','Профориентация и HR','Маркетинг и мероприятия','Продажи и презентации','Культура и просвещение','Развлечение и вовлечение']},
   {id:'C2_audience', q:'Кто будет пользоваться? Опишите аудиторию.', script:'*Возраст, подготовка, технология, B2B/B2C?*'},
   {id:'C3_context', q:'Где и в каких условиях будет использоваться решение?', script:'*Локация, формат (индивидуально/поток), частота, техника.*'},
-  // D
   {id:'D1_tech', q:'Какая технология лучше подойдёт?', script:'*Могу порекомендовать вариант под ваши цели и условия.*',
     choices:['VR','AR','Web-приложение','Мобильное приложение','Интерактивная панель/киоск','Комбинированное']},
   {id:'D2_vr_mode', q:'(Если VR) Какой режим VR планируете?', script:'*Выберем режим работы шлема — автономный или от ПК.*',
     choices:['Автономный (standalone)','Стационарный (PC VR)']},
   {id:'D3_cast', q:'Нужна ли трансляция на внешний экран?', script:'*Нужны ли наблюдатели на экране?*',
     choices:['Да, нужна трансляция','Нет, только индивидуально']},
-  // E
   {id:'E1_structure', q:'Как будет устроено приложение?', script:'*Один сценарий или платформа с меню?*',
     choices:['Простой запускаемый файл','Платформа с меню','Зацикленная экспозиция']},
   {id:'E2_ready', q:'Что у вас уже есть из контента?', script:'*Сценарий, 3D-модели, фото/видео, тексты, озвучка?*'},
@@ -153,20 +145,17 @@ const Q = [
     choices:['Фотореализм','Стилизация','Функциональный стиль']},
   {id:'E6_voice', q:'Нужна ли озвучка?', script:'*Будет ли профессиональная дикторская озвучка?*',
     choices:['Профессиональная озвучка','Только текстовые подсказки','Синтезированная речь','Персонализированная озвучка']},
-  // F
   {id:'F1_hw', q:'Есть ли у вас уже VR/AR-оборудование?', script:'*Есть оборудование или нужна рекомендация?*',
     choices:['Есть — укажу что именно','Есть частично','Нет — нужна рекомендация','Предложить вариант']},
   {id:'F2_users', q:'Сколько одновременно пользователей?', script:'*Один/группа/поток/мультиплеер?*',
     choices:['1 пользователь','2–5 пользователей','Массовый поток','Многопользовательский режим']},
   {id:'F3_req', q:'Особые технические требования?', script:'*Офлайн, статистика, интеграции, админ-панель?*'},
-  // G
   {id:'G1_deadline', q:'Когда проект должен быть готов?', script:'*Есть ли жёсткий дедлайн/мероприятие?*',
     choices:['Экспресс (2–4 недели)','Стандарт (1–2 месяца)','Расширенный (2–3 месяца)','Долгосрочный (3–6 месяцев)','Предложить вариант']},
   {id:'G2_budget', q:'На какой бюджет ориентируемся?', script:'*Честно обозначим диапазон — под него подберём масштаб.*',
     choices:['Есть фиксированная сумма','Диапазон (от-до)','Бюджет не определён — нужна оценка','Зависит от решения — обсудим','150–350 тыс. ₽','400–800 тыс. ₽','800 тыс.–1,5 млн ₽','1,5–3 млн ₽','3+ млн ₽','Предложить вариант']},
   {id:'G3_funds', q:'Источник финансирования?', script:'*Собственные / бюджет/тендер / грант / партнёрство?*',
     choices:['Собственные средства','Госбюджет / тендер','Грант','Инвестиции/партнёрство']},
-  // H
   {id:'H1_refs', q:'Есть ли примеры/референсы, которые нравятся?', script:'*Что из наших кейсов или чужих нравится?*'},
   {id:'H2_source', q:'Как вы о нас узнали?', script:'*Поиск/соцсети/рекомендация/выставка/рассылка/партнёр?*',
     choices:['Поиск в интернете','Социальные сети','Рекомендация','Видели на выставке','Рекламная рассылка','Существующий клиент/партнёр']},
@@ -174,7 +163,6 @@ const Q = [
     choices:['Да, планируем масштабировать','Возможно, в перспективе','Нет, разовое решение']}
 ];
 
-// Дополнительные ветки после C1
 const BRANCH = {
   'Обучение и тренировка': [
     {id:'C1x_skills', q:'Какие конкретные навыки отрабатываются?', script:'*Что должен уметь пользователь после прохождения?*'},
@@ -202,14 +190,13 @@ const BRANCH = {
   ]
 };
 
-// Подстановки для «Предложить вариант»
 const SUGGEST = {
   F1_hw: 'Рекомендуем Pico 4 / 4 Ultra (автономно или PC VR) + экран 43–55" для трансляции.',
   G1_deadline: 'Предлагаем режим «Стандарт»: 1–2 месяца с контрольными сборками раз в 2 недели.',
   G2_budget: 'Предложение по диапазонам: 400–800 тыс. ₽ (база), 800 тыс.–1,5 млн ₽ (стандарт), 1,5–3 млн ₽ (платформа).'
 };
 
-/* ====== Состояние чата ====== */
+/* ====== Состояние ====== */
 const state = { i:-1, queue:[...Q], answers:{}, files:[], idea:'' };
 
 function post(html, klass='bot'){
@@ -218,7 +205,11 @@ function post(html, klass='bot'){
 }
 function askNext(){
   state.i++;
-  if(state.i>=state.queue.length){ $('#status').textContent='Ответы собраны — жми «Собрать DOCX»'; post('<em>Спасибо! Нажмите «Собрать DOCX».</em>'); return; }
+  if(state.i>=state.queue.length){
+    $('#status').textContent='Ответы собраны — жми «Собрать текст»';
+    post('<em>Спасибо! Нажмите «Собрать текст» ниже.</em>');
+    return;
+  }
   const q = state.queue[state.i];
   let chips = '';
   if(q.choices){
@@ -230,15 +221,13 @@ function askNext(){
     chips = `<div class="chips"><span class="chip ghost" data-choice="Нет информации">Нет информации</span></div>`;
   }
   post(`<strong>${q.q}</strong><br><span class="muted">${q.script}</span>${chips}`);
-  // обработка кликов
-  $('#chatBox').querySelectorAll('.chip').forEach(ch=>{
+  // обработка кликов по чипсам (вешаем только для свежего блока)
+  Array.from($('#chatBox').querySelectorAll('.msg:last-child .chip')).forEach(ch=>{
     ch.onclick=()=>{
       if(ch.dataset.suggest){ handle(ch.dataset.suggest, SUGGEST[ch.dataset.suggest]||'Предложим вариант на созвоне.'); }
       else handle(q.id, ch.dataset.choice);
     };
   });
-  // если нужная ветка — подставим вопросы после ответа на C1
-  if(q.id==='C1_goal'){ /* ветки будут добавлены после ответа */ }
 }
 function handle(id, value){
   const q = state.queue[state.i];
@@ -249,7 +238,6 @@ function handle(id, value){
   state.answers[qid]=val;
   post(val,'user');
 
-  // динамическая ветка после C1
   if(qid==='C1_goal' && BRANCH[val]){
     const after = state.queue.slice(state.i+1);
     state.queue = state.queue.slice(0,state.i+1).concat(BRANCH[val]).concat(after);
@@ -257,55 +245,61 @@ function handle(id, value){
   askNext();
 }
 
-/* ====== Сбор документа ====== */
-async function buildDoc(){
-  // ответы (вопрос → ответ)
-  const lines = state.queue.map(q=> {
+/* ====== Сбор итогового текста ====== */
+async function buildText(){
+  $('#status').textContent='Собираю текст…';
+
+  const answersBlock = state.queue.map(q=>{
     const ans = state.answers[q.id] ?? '—';
-    return `• ${q.q}\n  Ответ на форму: ${ans}`;
+    return `• ${q.q}\n  Ответ: ${ans}`;
   }).join('\n');
 
-  // файлы -> текст
   const docsText = state.files.length? await extractFromFiles(state.files) : '(файлы не приложены)';
 
-  // DOCX
-  $('#status').textContent='Собираю документ…';
-  const blob = await buildDocx({
-    templateText: TEMPLATE_PROMPT_TEXT,
-    answersText: lines,
-    docsText: docsText,
-    ideasText: state.idea || '(не указано)',
-    fileName: 'maestro_chat.docx'
-  });
-  $('#status').textContent='Готово: maestro_chat.docx';
-  return blob;
+  const final = [
+    TEMPLATE_PROMPT_TEXT,
+    '',
+    'ОТВЕТЫ ИЗ ФОРМЫ',
+    answersBlock,
+    '',
+    'ИНФОРМАЦИЯ ИЗ ДОКУМЕНТОВ',
+    docsText,
+    '',
+    'МОЯ ИДЕЯ',
+    state.idea || '(не указано)'
+  ].join('\n');
+
+  const outEl = $('#finalText');
+  outEl.value = final;
+  $('#outSection').classList.remove('hidden');
+  $('#status').textContent='Готово: текст собран ниже.';
 }
 
-async function buildDocx({templateText, answersText, docsText, ideasText, fileName}){
-  if (USE_EXTERNAL_DOCX_TEMPLATE){
-    const bin = await (await fetch(TPL_PATH)).arrayBuffer();
-    const zip = new PizZip(bin);
-    const doc = new window.docxtemplater(zip, {paragraphLoop:true,linebreaks:true});
-    doc.render({answers:answersText||'', docs:docsText||'', ideas:ideasText||''});
-    const blob = doc.getZip().generate({type:'blob'});
-    saveAs(blob, fileName); return blob;
-  } else {
-    const {Document, Packer, Paragraph, HeadingLevel, TextRun} = window.docx;
-    function para(t){return new Paragraph({children:[new TextRun({text:t})]});}
-    function heading(t){return new Paragraph({text:t, heading:HeadingLevel.HEADING_2});}
-    const doc = new Document({sections:[{children:[
-      heading('Универсальный промт для создания продающих коммерческих предложений'),
-      ...templateText.split(/\n+/).filter(Boolean).map(para),
-      new Paragraph({}), heading('ОТВЕТЫ ИЗ ФОРМЫ (Ответ на форму)'),
-      ...answersText.split('\n').map(para),
-      new Paragraph({}), heading('ИНФОРМАЦИЯ ИЗ ДОКУМЕНТОВ'),
-      ...docsText.split('\n').map(para),
-      new Paragraph({}), heading('МОЯ ИДЕЯ'),
-      ...ideasText.split('\n').map(para)
-    ]}]});
-    const blob = await Packer.toBlob(doc);
-    saveAs(blob, fileName); return blob;
+async function copyFinal(){
+  const t = $('#finalText').value;
+  try{
+    await navigator.clipboard.writeText(t);
+    flashStatus('Скопировано в буфер обмена', 'ok');
+  }catch{
+    // Фоллбек
+    const el=$('#finalText'); el.focus(); el.select(); document.execCommand('copy');
+    flashStatus('Скопировано (fallback)', 'ok');
   }
+}
+
+function downloadTxt(){
+  const blob = new Blob([$('#finalText').value||''], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'maestro_chat.txt';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+function flashStatus(text, mode){
+  const el=$('#status');
+  const prev=el.textContent; el.textContent=text;
+  el.style.color = mode==='ok'? 'var(--ok)' : (mode==='err'? 'var(--danger)' : '');
+  setTimeout(()=>{ el.textContent=prev; el.style.color=''; }, 1600);
 }
 
 /* ====== События ====== */
@@ -321,12 +315,10 @@ $('#fileChat').onchange=e=>{ state.files = Array.from(e.target.files||[]); $('#f
 $('#addIdea').onclick=()=> $('#ideaBox').classList.toggle('hidden');
 $('#ideaText').addEventListener('input', e=> state.idea = e.target.value);
 
-$('#buildDoc').onclick=buildDoc;
-$('#zipAll').onclick=async()=>{
-  const zip=new JSZip(); const blob=await buildDoc(); zip.file('maestro_chat.docx', blob);
-  if(state.files.length){ const af=zip.folder('attachments'); for(const f of state.files){ af.file(f.name, await f.arrayBuffer()); } }
-  saveAs(await zip.generateAsync({type:'blob'}),'maestro_package.zip');
-};
+$('#buildText').onclick=buildText;
+$('#copyBtn').onclick=copyFinal;
+$('#finalText').addEventListener('click', copyFinal); // клик по полю — копирует
+$('#downloadTxt').onclick=downloadTxt;
 
 /* автостарт */
 start();
