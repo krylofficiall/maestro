@@ -1,707 +1,329 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>maestro.</title>
 <style>
-  :root{
-    --bg:#0b0e12; --card:#11151c; --line:#212631; --fg:#e6e7eb; --muted:#95a1b2;
-    --accent:#ffffff; --accent-2:#bfc7d8; --chip:#161b22; --chip-br:#2a3140;
-    --chip-hover:#1f2530; --chip-active:#2a3140; --danger:#ff4d4f; --ok:#5bef8a;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
-    font:16px/1.5 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif}
-  a{color:var(--accent);text-decoration:none}
-  header{border-bottom:1px solid var(--line);padding:12px 20px;display:flex;gap:16px;align-items:center;justify-content:space-between;background:#0a0d11;position:sticky;top:0;z-index:5}
+  :root{--bg:#0b0e12;--card:#11151c;--line:#212631;--fg:#e6e7eb;--muted:#95a1b2;--chip:#0f141c;--chip-br:#2a3140;--accent:#fff;--danger:#ff4d4f;--ok:#5bef8a}
+  *{box-sizing:border-box} html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);
+    font:16px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  header{position:sticky;top:0;z-index:9;background:#0a0d11;border-bottom:1px solid var(--line);padding:10px 18px;display:flex;align-items:center;gap:14px;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:12px}
-  .brandImgWrap{display:flex;align-items:center;gap:10px}
-  #brandImg{height:28px;max-width:320px;object-fit:contain;cursor:pointer;filter:drop-shadow(0 2px 8px #0007)}
-  .hint{font-size:12px;color:#b9c2d3}
+  .brand img{height:36px}
   .tabs{display:flex;gap:6px}
-  .tab{border:1px solid var(--line);padding:8px 12px;cursor:pointer;border-radius:999px;background:var(--chip);color:var(--accent-2);transition:.25s ease;user-select:none}
-  .tab:hover{border-color:var(--accent-2);color:var(--accent)}
-  .tab.active{background:#ffffff10;border-color:#ffffff44;color:#fff;box-shadow:0 0 0 1px #ffffff22 inset}
+  .tab{border:1px solid var(--line);padding:8px 12px;border-radius:999px;background:var(--chip);cursor:pointer;color:#c9d3e6}
+  .tab.active{background:#ffffff10;border-color:#ffffff44;color:#fff}
   main{max-width:1100px;margin:24px auto;padding:0 20px}
-  .panel{display:none;animation:fadeIn .35s ease}
-  .panel.active{display:block}
-  .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:24px}
-  .card{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--card);box-shadow:0 10px 30px #00000033}
-  .title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
-  .meta{font-size:12px;color:var(--muted)}
-  .hr{border-top:1px solid var(--line);margin:14px 0}
-  /* CHAT */
-  .chat{height:520px;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:10px;border:1px dashed var(--line);border-radius:14px;background:#0d1117;scroll-behavior:smooth}
-  .msg{max-width:82%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);animation:slideUp .25s ease;white-space:pre-wrap}
-  .msg.bot{align-self:flex-start;background:#0f141c}
-  .msg.user{align-self:flex-end;background:#0b0e12;border-color:#ffffff33;box-shadow:0 0 0 1px #ffffff16 inset}
-  .typing{width:46px;height:14px;display:flex;gap:6px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:#0f141c}
-  .typing i{width:6px;height:6px;border-radius:50%;background:#74839a;animation:blink 1.2s infinite}
-  .typing i:nth-child(2){animation-delay:.2s}
-  .typing i:nth-child(3){animation-delay:.4s}
-  .inputbar{display:flex;gap:8px;margin-top:10px}
-  .inputbar textarea{flex:1;padding:12px 12px;border:1px solid var(--line);border-radius:12px;min-height:44px;background:#0d1117;color:var(--fg);outline:none;transition:border .2s ease;resize:vertical}
-  .btn{border:1px solid var(--line);background:#0f141c;color:var(--fg);padding:10px 14px;border-radius:12px;cursor:pointer;transition:.2s ease}
-  .btn:hover{border-color:#ffffff44;background:#121a25}
-  .btn.black{background:#ffffff14;color:#fff;border-color:#ffffff44}
-  .btn.black:hover{background:#ffffff22}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
-  .chip{border:1px solid var(--chip-br);padding:8px 12px;border-radius:999px;cursor:pointer;background:var(--chip);color:#d7deee;transition:transform .06s ease, background .2s ease, border .2s ease;animation:pop .18s ease;user-select:none}
-  .chip:hover{background:var(--chip-hover);border-color:#3a4254}
-  .chip:active{transform:scale(.97);background:var(--chip-active)}
+  .panel{display:none;animation:fade .25s ease} .panel.active{display:block}
+  .card{border:1px solid var(--line);background:var(--card);border-radius:16px;padding:14px;box-shadow:0 10px 30px #0006}
+  .title{font-size:13px;text-transform:uppercase;color:var(--muted);letter-spacing:.1em;margin-bottom:8px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:var(--chip);color:#fff;padding:10px 12px;border-radius:12px;cursor:pointer}
+  .btn:hover{background:#121a25;border-color:#3a4254}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+  .chip{border:1px solid var(--chip-br);background:#0e1420;color:#dbe3f5;padding:8px 12px;border-radius:999px;cursor:pointer}
   .chip.ghost{border-style:dashed;color:#b7bfd1}
-  .progress{height:10px;background:#0d1117;border-radius:999px;overflow:hidden;border:1px solid var(--line)}
-  .bar{height:100%;background:linear-gradient(90deg,#7f8cff,#5be2ff);width:0%;transition:width .35s ease}
-  .kv{display:grid;grid-template-columns:180px 1fr;gap:6px;margin:6px 0}
-  .kv div:first-child{color:var(--muted)}
-  .files{display:flex;flex-wrap:wrap;gap:8px}
-  .filepill{border:1px solid var(--line);padding:6px 10px;border-radius:999px;background:#0d1117;color:#c7d2e2}
-  pre, textarea.output{width:100%;min-height:220px;border:1px solid var(--line);border-radius:12px;padding:12px;background:#0d1117;color:#e7e9ef;white-space:pre-wrap}
-  .danger{color:var(--danger)}
-  .ok{color:var(--ok)}
-  .right{display:flex;justify-content:flex-end;gap:8px}
-  .hidden{display:none !important}
-  /* custom blocks */
-  .customWrap{display:flex;flex-direction:column;gap:12px;margin-top:10px}
-  .customCard{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0d1117;animation:fadeIn .25s ease}
-  .customHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-  .badge{font-size:12px;color:#c7d2e2;background:#111827;border:1px solid var(--line);padding:4px 8px;border-radius:999px}
-  .del{cursor:pointer;border:1px solid var(--line);padding:4px 8px;border-radius:999px;background:#161b22}
-  .del:hover{background:#1d2532}
-  .plusWrap{position:relative;display:inline-block}
-  .plusBtn{border:1px solid var(--line);background:#0f141c;color:#fff;border-radius:999px;padding:8px 12px;cursor:pointer}
-  .plusMenu{position:absolute;top:42px;left:0;min-width:240px;background:#0f141c;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px #0008;padding:8px;display:none;z-index:10}
-  .plusMenu .item{padding:8px 10px;border-radius:8px;cursor:pointer}
-  .plusMenu .item:hover{background:#121a25}
-  @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
-  @keyframes slideUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-  @keyframes pop{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
-  @keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
-  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-  /* hero drop */
-  .drop{border:1px dashed var(--line);border-radius:12px;padding:6px 10px}
+  textarea,input[type="text"]{width:100%;background:#0d1117;color:#e6e7eb;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+  .chat{min-height:380px;max-height:520px;overflow:auto;border:1px dashed var(--line);border-radius:14px;padding:10px;background:#0d1117}
+  .msg{max-width:82%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);margin:8px 0}
+  .bot{background:#0f141c} .user{background:#0b0e12;border-color:#ffffff33}
+  .muted{color:var(--muted)}
+  .hr{border-top:1px solid var(--line);margin:12px 0}
+  .kv{display:grid;grid-template-columns:170px 1fr;gap:6px;font-size:14px}
+  .files{display:flex;gap:8px;flex-wrap:wrap}
+  .pill{border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#0d1117}
+  .danger{color:var(--danger)} .ok{color:var(--ok)}
+  .footer-actions{display:flex;gap:8px;justify-content:flex-end}
+  .hidden{display:none!important}
+  .logoWrap{display:flex;justify-content:center;padding:26px 0}
+  .logoWrap img{max-width:260px;opacity:.95}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @media (max-width: 980px){.kv{grid-template-columns:120px 1fr}}
 </style>
 </head>
 <body>
 <header>
   <div class="brand">
-    <div class="brandImgWrap">
-      <img id="brandImg" alt="maestro." title="Нажмите, чтобы загрузить ваш union-dot.png">
-      <input id="brandUploader" class="hidden" type="file" accept="image/*">
-    </div>
-    <div class="hint">maestro. — конструктор КП, анализ и финальный промт</div>
+    <img src="Union.png" alt="maestro.">
+    <strong>maestro.</strong>
   </div>
   <div class="tabs">
-    <div class="tab active" data-tab="files">Вариант 1: Анализ</div>
-    <div class="tab" data-tab="chat">Вариант 2: Умный чат</div>
+    <div class="tab active" data-tab="chat">Умный чат</div>
+    <div class="tab" data-tab="analyze">Анализ документов</div>
   </div>
 </header>
 
 <main>
-  <!-- ===== VARIANT 1: FILE ANALYSIS (default) ===== -->
-  <section id="panel-files" class="panel active">
+  <div class="logoWrap"><img src="Union.png" alt="maestro."></div>
+
+  <!-- ===== УМНЫЙ ЧАТ ===== -->
+  <section id="panel-chat" class="panel active">
     <div class="card">
-      <div class="title">Загрузка материалов</div>
-      <div class="chips" style="align-items:center">
-        <input id="fileInputAnalysis" type="file" multiple />
-        <button id="analyze" class="btn black">Извлечь и разобрать</button>
-        <div class="plusWrap">
-          <button id="plusBtn" class="plusBtn">+ Добавить блок</button>
-          <div id="plusMenu" class="plusMenu">
-            <div class="item" data-type="Транскрипт звонка">Транскрипт звонка</div>
-            <div class="item" data-type="Текстовый комментарий">Текстовый комментарий</div>
-            <div class="item" data-type="Запрос клиента">Запрос клиента</div>
-            <div class="item" data-type="Прочий текст">Прочий текст</div>
-          </div>
-        </div>
+      <div class="title">Ответы по шаблону + файлы + «Моя идея»</div>
+      <div class="row">
+        <input id="fileChat" type="file" multiple>
+        <button class="btn" id="addIdeaChat">Добавить идею</button>
+        <button class="btn" id="startChat">Начать</button>
       </div>
-      <div id="fileListAnalysis" class="files"></div>
-
+      <div id="ideaChatBox" class="hidden" style="margin-top:8px">
+        <textarea id="ideaChat" placeholder="Опиши идею — она войдёт в документ как «Моя идея»"></textarea>
+      </div>
       <div class="hr"></div>
-      <div class="title">Текстовые блоки (добавляются вручную)</div>
-      <div id="customBlocks" class="customWrap"></div>
-      <div class="meta">Эти тексты учитываются как цитаты: войдут в анализ, сводный документ и финальный промт.</div>
-    </div>
-
-    <div class="grid" style="margin-top:24px">
-      <div class="card">
-        <div class="title">Извлечённые цитаты + добавленные блоки</div>
-        <textarea id="extractedText" class="output" placeholder="Сюда попадёт текст из файлов и из ваших блоков…"></textarea>
-      </div>
-      <div class="card">
-        <div class="title">Оценка полноты</div>
-        <div class="kv"><div>Покрытие</div><div class="ok"><span id="covPct">0%</span></div></div>
-        <div class="kv"><div>Хватает</div><div id="covHave">–</div></div>
-        <div class="kv"><div>Не хватает</div><div id="covMiss" class="danger">–</div></div>
-        <div class="hr"></div>
-        <div class="title">Скрипт вопросов для созвона</div>
-        <pre id="callScript" style="min-height:160px"></pre>
+      <div class="chat" id="chatBox"></div>
+      <div class="row">
+        <input id="answerInput" type="text" placeholder="Ответ…">
+        <button class="btn" id="sendAnswer">Ответить</button>
       </div>
     </div>
-
-    <div class="card" style="margin-top:24px;">
-      <div class="title">Сводный документ (все ответы/материалы)</div>
-      <textarea id="fullDoc" class="output" placeholder="Единый документ для передачи в ИИ или в архив…"></textarea>
-    </div>
-
-    <div class="card" style="margin-top:24px;">
-      <div class="title">Распределение по структуре КП (цитаты)</div>
-      <textarea id="structureOut" class="output" placeholder="Авто-разложение фраз по разделам идеального КП…"></textarea>
-    </div>
-
-    <div class="card" style="margin-top:24px;">
-      <div class="title">Черновик концепции КП (по извлечённым данным)</div>
-      <textarea id="concept" class="output" placeholder="Авто-набросок (не цитаты). "></textarea>
-      <div class="right" style="margin-top:8px">
-        <button id="copyFiles" class="btn">Копировать всё</button>
-        <button id="zipFiles" class="btn black">Скачать ZIP</button>
+    <div class="card" style="margin-top:16px">
+      <div class="title">Экспорт</div>
+      <div class="kv">
+        <div>Состояние</div><div id="statusChat" class="muted">ожидаю ответов…</div>
+        <div>Файлы</div><div id="filesChat" class="files">—</div>
       </div>
-      <div class="meta" style="margin-top:8px">Важно: «Черновик концепции КП» — машинный конструктор и не является цитатами. Остальные блоки сохраняют точные формулировки материалов.</div>
-    </div>
-
-    <div class="card" style="margin-top:24px;">
-      <div class="title">Финальный промт (для ИИ)</div>
-      <div class="chips" style="align-items:center">
-        <input id="templateInput" type="file" accept=".docx" />
-        <button id="rebuildPrompt" class="btn">Пересобрать промт</button>
-        <button id="copyPrompt" class="btn black">Копировать промт</button>
+      <div class="footer-actions" style="margin-top:8px">
+        <button class="btn" id="buildDocChat">Собрать DOCX</button>
+        <button class="btn" id="zipChat">Скачать ZIP</button>
       </div>
-      <div class="meta">Загрузите ваш DOCX-шаблон промта — его текст закрепится в начале. Дальше автоматически добавятся тезисы и весь корпус материалов.</div>
-      <textarea id="finalPrompt" class="output" placeholder="Здесь появится готовый длинный промт — со «вшитым» шаблоном и всеми тезисами."></textarea>
     </div>
   </section>
 
-  <!-- ===== VARIANT 2: CHAT-ONLY ===== -->
-  <section id="panel-chat" class="panel">
+  <!-- ===== АНАЛИЗ ДОКУМЕНТОВ ===== -->
+  <section id="panel-analyze" class="panel">
     <div class="card">
-      <div class="title">Умный чат (сбор фактов → сразу в анализ)</div>
-      <div class="chat" id="chatBox"></div>
-      <div class="chips">
-        <label class="chip ghost" style="cursor:pointer">
-          <input id="chatFileInput" type="file" multiple class="hidden"> + прикрепить файлы
-        </label>
-        <div class="chip suggest" data-say="Клиент — департамент туризма НН. Нужна карта памятников (50–80 объектов). Срок — Q1 2026. Бюджет — 3–5 млн ₽.">Пример заполнения</div>
-        <div class="chip" data-say="Платформа: мобильное приложение + офлайн-кэш.">Платформа</div>
-        <div class="chip" data-say="ЦА: туристы в городе, 18–65 лет.">ЦА</div>
-        <div class="chip" data-say="Ключевая метрика — число посещённых точек, удержание, NPS.">KPI</div>
+      <div class="title">Материалы заказчика</div>
+      <div class="row">
+        <input id="fileAnalyze" type="file" multiple>
+        <button class="btn" id="addBlock">+ Добавить блок</button>
+        <button class="btn" id="runAnalyze">Извлечь текст</button>
       </div>
-      <div class="inputbar">
-        <textarea id="chatInput" rows="2" placeholder="Напишите, что известно о проекте..."></textarea>
-        <button id="sendChat" class="btn black">Отправить</button>
+      <div id="customList" class="files" style="margin-top:8px"></div>
+      <div class="hr"></div>
+      <div class="title">Извлечённый текст</div>
+      <textarea id="extracted" style="min-height:220px" placeholder="Здесь появятся цитаты из файлов и пользовательских блоков…"></textarea>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="title">Экспорт</div>
+      <div class="kv">
+        <div>Файлы</div><div id="filesAnalyze" class="files">—</div>
+        <div>Покрытие (эвристика)</div><div id="coverage" class="ok">—</div>
       </div>
-      <div class="meta" style="margin-top:6px">Все сообщения чата включаются в анализ и финальный промт. Чат подсказывает, какие данные дополнить.</div>
+      <div class="footer-actions" style="margin-top:8px">
+        <button class="btn" id="buildDocAnalyze">Собрать DOCX</button>
+        <button class="btn" id="zipAnalyze">Скачать ZIP</button>
+      </div>
     </div>
   </section>
 </main>
 
-<!-- ===== LIBS ===== -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- ===== LIBS (CDN) ===== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.min.js" crossorigin="anonymous"></script>
 <script>if(window['pdfjsLib']) pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.worker.min.js';</script>
 <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.7/dist/pizzip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.46.2/build/docxtemplater.js"></script>
 
 <script>
-/* ====== Константы и состояние ====== */
-const APP_NAME = 'maestro.';
+/*** ====== КОНФИГ ====== ***/
+const USE_EXTERNAL_DOCX_TEMPLATE = false; // если true, положи template.docx в корень и добавь плейсхолдеры {answers}, {docs}, {ideas}
+const TPL_PATH = 'template.docx';
+
+/*** ====== ТЕКСТОВЫЙ ШАБЛОН (из твоего файла «Шаблон для КП.docx») ======
+  Ниже — тот самый промт-шаблон (урезать не нужно). Он попадёт в начало DOCX,
+  а затем мы добавим блоки «Ответы из формы», «Информация из документов», «Моя идея».
+***/
+const TEMPLATE_PROMPT_TEXT = `
+Универсальный промт для создания продающих коммерческих предложений
+
+Ты — эксперт по созданию высокоэффективных коммерческих предложений...
+[Сокращено в интерфейсе для читаемости: положи полный текст из твоего шаблона сюда.
+Если оставишь как есть — документ соберётся с этим укороченным текстом.]
+`;
+
+/*** ====== УТИЛИТЫ ====== ***/
+const $ = s => document.querySelector(s); const $$ = s => Array.from(document.querySelectorAll(s));
+function toPill(name,size){ return `<span class="pill">${name}${size?` (${Math.round(size/1024)} КБ)`:''}</span>` }
+function readAsText(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result||'');r.onerror=rej;r.readAsText(file);});}
+function readAsAB(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsArrayBuffer(file);});}
+async function extractPDF(file){const data=await readAsAB(file);const pdf=await pdfjsLib.getDocument({data}).promise;let all='';for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const c=await page.getTextContent();all+=c.items.map(i=>i.str).join(' ')+'\n';}return all;}
+async function extractDOCX(file){const data=await readAsAB(file);const out=await window.mammoth.extractRawText({arrayBuffer:data});return out.value||'';}
+async function extractFromFiles(files){let out='';for(const f of files){try{
+  if(/\.pdf$/i.test(f.name)) out+=`\n\n===== ${f.name} (PDF) =====\n`+(await extractPDF(f)).trim();
+  else if(/\.docx$/i.test(f.name)) out+=`\n\n===== ${f.name} (DOCX) =====\n`+(await extractDOCX(f)).trim();
+  else if(/\.(txt|md|csv|log)$/i.test(f.name) || (f.type && f.type.startsWith('text'))) out+=`\n\n===== ${f.name} (TEXT) =====\n`+(await readAsText(f)).trim();
+  else out+=`\n\n===== ${f.name} (неизвлекаемый) =====\n[Тип не поддержан в браузере]`;
+}catch(e){out+=`\n\n===== ${f.name} (ошибка) =====\n[${e.message}]`}}return out.trim();}
+
+/*** ====== ДОКУМЕНТ (DOCX) ====== ***/
+async function buildDocx({templateText, answersText, docsText, ideasText, fileName='maestro.docx'}){
+  if (USE_EXTERNAL_DOCX_TEMPLATE){
+    // docxtemplater: template.docx должен содержать {answers}, {docs}, {ideas}
+    const bin = await (await fetch(TPL_PATH)).arrayBuffer();
+    const zip = new PizZip(bin); const doc = new window.docxtemplater(zip, {paragraphLoop:true,linebreaks:true});
+    doc.render({answers:answersText||'', docs:docsText||'', ideas:ideasText||''});
+    const blob = doc.getZip().generate({type:'blob'});
+    saveAs(blob, fileName);
+    return blob;
+  } else {
+    const {Document, Packer, Paragraph, HeadingLevel, TextRun} = window.docx;
+    function para(t){return new Paragraph({children:[new TextRun({text:t})]});}
+    function heading(t){return new Paragraph({text:t, heading:HeadingLevel.HEADING_2});}
+
+    const doc = new Document({sections:[{children:[
+      heading('Универсальный промт для создания продающих коммерческих предложений'),
+      ...templateText.split(/\n+/).filter(x=>x.trim()).map(t=>para(t)),
+      new Paragraph({}),
+      heading('ОТВЕТЫ ИЗ ФОРМЫ (Ответ на форму)'),
+      ...answersText.split('\n').map(para),
+      new Paragraph({}),
+      heading('ИНФОРМАЦИЯ ИЗ ДОКУМЕНТОВ'),
+      ...docsText.split('\n').map(para),
+      new Paragraph({}),
+      heading('МОЯ ИДЕЯ'),
+      ...ideasText.split('\n').map(para)
+    ]}]});
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, fileName);
+    return blob;
+  }
+}
+
+/*** ====== ВКЛАДКИ ====== ***/
+$$('.tab').forEach(t=>t.onclick=()=>{
+  $$('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
+  $$('.panel').forEach(x=>x.classList.remove('active'));
+  (t.dataset.tab==='chat'?$('#panel-chat'):$('#panel-analyze')).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+/*** ====== РЕЖИМ «УМНЫЙ ЧАТ» ====== ***/
 const QUESTIONS = [
-  {id:'client', text:'Кто клиент? (индустрия, размер, специфика)', required:true},
-  {id:'problem', text:'Какую проблему решаем? (текстом)', required:true},
-  {id:'deadline', text:'Крайний срок/когда нужен результат?', required:true},
-  {id:'budget', text:'Есть ориентир по бюджету? (диапазон или «не определён»)', required:true},
-  {id:'platform', text:'Платформа: VR / AR / Веб / Мобильное / Киоск / Комбинация', required:true},
-  {id:'audience', text:'Кто конечные пользователи? (возраст/сфера/подготовка)', required:true},
-  {id:'users', text:'Сколько пользователей? (один/группа/массово)', required:true},
-  {id:'place', text:'Где будут пользоваться? (офис/выставка/дом/улица)', required:true},
-  {id:'script_ready', text:'Есть готовый сценарий? (да/нет/частично)', required:true},
-  {id:'duration', text:'Длительность пользовательского опыта (мин.)', required:true},
-  {id:'interaction', text:'Тип взаимодействия: пассивный/активный/обучение/комбинация', required:true},
-  {id:'assets', text:'Есть ли 3D-модели? (да/нет/приложу)', required:true},
-  {id:'texts', text:'Есть ли тексты/описания? (да/нет/нужна помощь)', required:true},
-  {id:'voice', text:'Нужна ли дикторская озвучка? (да/нет)', required:true},
-  {id:'quality', text:'Качество графики: фотореализм/стилизация/простая', required:true},
-  {id:'gear', text:'Есть ли у клиента VR/AR-оборудование? (какое?)', required:true},
-  {id:'gear_count', text:'Сколько комплектов нужно?', required:true},
-  {id:'gear_budget', text:'Оборудование входит в бюджет или закупается отдельно?', required:true},
-  {id:'install', text:'Стационарная или переносная установка?', required:true},
-  {id:'offline', text:'Нужно офлайн-работать без интернета? (да/нет)', required:true},
-  {id:'devices', text:'Нужна адаптация под разные устройства?', required:true},
-  {id:'cast', text:'Нужна трансляция на экран/проектор? (да/нет)', required:true},
-  {id:'metrics', text:'Собирать аналитику использования? (да/нет)', required:true},
-  {id:'admin', text:'Нужна админ-панель для изменения контента? (да/нет)', required:true},
-  {id:'bizgoal', text:'Бизнес-задача (продажи/обучение/профориентация/PR/образование/другое)', required:true},
-  {id:'kpi', text:'Как измерять успех? (конкретные метрики)', required:true}
+  {id:'client', q:'Кто клиент? (индустрия, размер, специфика)', demo:'*Как правильно представить вас в КП? Чем занимаетесь и какого масштаба бизнес?*'},
+  {id:'problem', q:'Какую проблему решаем?', demo:'*Если коротко — какая боль мешает достичь результата?*'},
+  {id:'deadline', q:'Крайний срок / когда нужен результат?', demo:'*К какому дню должно работать — ориентир?*'},
+  {id:'budget', q:'Ориентир по бюджету', demo:'*В каком диапазоне комфортно обсуждать инвестиции?*', choices:['до 1 млн ₽','1–3 млн ₽','3–7 млн ₽','7–12 млн ₽']},
+  {id:'platform', q:'Платформа', demo:'*Где это живёт: VR, AR, веб, мобильное приложение, киоск?*', choices:['VR','AR','Веб','Мобильное','Киоск','Комбинация']},
+  {id:'audience', q:'Кто конечные пользователи? (возраст/сфера/подготовка)', demo:'*Кто будет пользоваться прямо руками?*'},
+  {id:'count', q:'Сколько пользователей (1/группа/массово)?', demo:'*Один, небольшие группы или потоки?*', choices:['1','Группа','Массово']},
+  {id:'place', q:'Где используют (офис/выставка/дом/улица)?', demo:'*Основная среда использования — где?*', choices:['Офис','Выставка','Дом','Улица']},
+  {id:'scenario', q:'Есть готовый сценарий/ТЗ?', demo:'*Есть ли уже набросок или делаем с нуля?*', choices:['Да','Частично','Нет','Нет информации']},
+  {id:'duration', q:'Длительность пользовательского опыта (мин)', demo:'*Сколько времени идёт один проход?*', choices:['3–5','5–7','10–15','20+']},
+  {id:'interaction', q:'Тип взаимодействия', demo:'*Это просмотр, тренажёр, обучение с проверкой или микс?*', choices:['Пассивный просмотр','Активный интерактив','Учебный c тестами','Комбинация','Предложить решение']},
+  {id:'assets', q:'Есть ли 3D-модели/контент?', demo:'*Чем располагаете из ассетов?*', choices:['Да (пришлю)','Частично','Нет','Нужна помощь']},
+  {id:'gear', q:'Есть ли оборудование у клиента?', demo:'*Какие устройства уже есть?*', choices:['Pico','Quest','Vive','HoloLens','Планшеты/смартфоны','Нет информации']},
+  {id:'kpi', q:'Как измеряем успех (KPI)?', demo:'*Какие метрики покажут, что всё удалось?*'},
 ];
-const REQUIRED_IDS = QUESTIONS.filter(q=>q.required).map(q=>q.id);
 
-const $  = s => document.querySelector(s);
-const $$ = s => Array.from(document.querySelectorAll(s));
-
-const analysis = {
-  brandDataUrl: '',           // логотип union-dot.png
-  files: [],                  // File[]
-  custom: [],                 // {id, type, text}[]
-  extracted: '',              // текст из файлов
-  combined: '',               // общий текст: файлы + кастом + чат + прикреплённые в чате
-  templateText: '',           // текст из DOCX шаблона промта
-  chat: []                    // {role:'user'|'bot', text:string}
+const SUGGESTIONS = {
+  interaction:'Рекомендуем микс: короткие сцены с простыми действиями + быстрая проверка знаний. Такой формат даёт высокий охват и понятный результат.'
 };
 
-/* ====== Бренд/логотип в шапке ====== */
-function setBrandImg(src){
-  const el = $('#brandImg');
-  if(src){ el.src = src; analysis.brandDataUrl = src; }
-  else { el.removeAttribute('src'); el.alt = APP_NAME; }
-}
-(function initBrand(){
-  setBrandImg('');
-  $('#brandImg').addEventListener('click', ()=> $('#brandUploader').click());
-  $('#brandUploader').addEventListener('change', e=>{
-    const f = e.target.files?.[0]; if(!f) return;
-    const r = new FileReader();
-    r.onload = () => setBrandImg(r.result);
-    r.readAsDataURL(f);
-  });
-  // drag & drop
-  document.addEventListener('dragover', e=>{ e.preventDefault(); });
-  document.addEventListener('drop', e=>{
-    if(!e.dataTransfer || !e.dataTransfer.files?.length) return;
-    const f = e.dataTransfer.files[0];
-    if(f.type.startsWith('image/')){
-      const r = new FileReader();
-      r.onload = () => setBrandImg(r.result);
-      r.readAsDataURL(f);
-      e.preventDefault();
+const chatState = {i:-1, answers:{}, files:[], idea:''};
+
+function renderFilesList(node, files){ node.innerHTML = files.length? files.map(f=>toPill(f.name,f.size)).join(' ') : '—'; }
+
+function chatPost(text,klass='bot'){ const div=document.createElement('div'); div.className='msg '+klass; div.innerHTML=text; $('#chatBox').appendChild(div); $('#chatBox').scrollTop=1e9; }
+function askNext(){
+  chatState.i++;
+  if(chatState.i>=QUESTIONS.length){ $('#statusChat').textContent='все ответы получены — собери DOCX'; chatPost('<em>Спасибо! Нажми «Собрать DOCX».</em>','bot'); return; }
+  const q=QUESTIONS[chatState.i];
+  let chips = (q.choices||[]).map(c=>`<span class="chip" data-choice="${c}">${c}</span>`).join(' ');
+  chips += ` <span class="chip ghost" data-choice="Нет информации">Нет информации</span>`;
+  if(q.choices && q.choices.includes('Предложить решение')) chips += ` <span class="chip" data-suggest="${q.id}">Предложить решение</span>`;
+  chatPost(`<strong>${q.q}</strong><br><span class="muted">${q.demo}</span>${q.choices?'<div class="chips" style="margin-top:6px">'+chips+'</div>':''}`);
+  // клики по вариантам
+  $$('#chatBox .chip').forEach(ch=>{
+    ch.onclick=()=>{
+      if(ch.dataset.suggest){ const t=SUGGESTIONS[ch.dataset.suggest]||'Предложим на встрече.'; handleAnswer(t); }
+      else handleAnswer(ch.dataset.choice);
     }
   });
-})();
-
-/* ====== Вкладки ====== */
-$$('.tab').forEach(t=>{
-  t.addEventListener('click', ()=>{
-    $$('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
-    $$('.panel').forEach(p=>p.classList.remove('active'));
-    (t.dataset.tab==='files' ? $('#panel-files') : $('#panel-chat')).classList.add('active');
-    // автопрокрутка чата при переключении на чат
-    if(t.dataset.tab==='chat'){ const box = $('#chatBox'); box.scrollTop = box.scrollHeight; }
-  });
-});
-
-/* ====== Чтение файлов ====== */
-function renderFiles(node, files){
-  node.innerHTML='';
-  files.forEach(f=>{
-    const d=document.createElement('div');
-    d.className='filepill';
-    d.textContent = f.name + ' (' + Math.round(f.size/1024) + ' КБ)';
-    node.appendChild(d);
-  });
 }
-function readAsText(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onerror=()=>rej(new Error('read error')); r.onload=()=>res(r.result); r.readAsText(file); });}
-function readAsAB(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onerror=()=>rej(new Error('ab error')); r.onload=()=>res(r.result); r.readAsArrayBuffer(file); });}
-async function extractFromPDF(file){ const data=await readAsAB(file); const pdf=await pdfjsLib.getDocument({data}).promise; let full=''; for(let p=1;p<=pdf.numPages;p++){ const page=await pdf.getPage(p); const content=await page.getTextContent(); full += content.items.map(i=>i.str).join(' ')+'\n'; } return full; }
-async function extractFromDOCX(file){ const data=await readAsAB(file); const out=await window.mammoth.extractRawText({arrayBuffer:data}); return out.value||''; }
-async function extractTextFromFiles(files){
-  let all=''; for(const f of files){ const type=f.type||''; try{
-    if(type.includes('pdf')||/\.pdf$/i.test(f.name)){ all+='\n\n===== '+f.name+' (PDF) =====\n'+(await extractFromPDF(f)).trim(); }
-    else if(type.includes('word')||/\.docx$/i.test(f.name)){ all+='\n\n===== '+f.name+' (DOCX) =====\n'+(await extractFromDOCX(f)).trim(); }
-    else if(type.startsWith('text')||/\.(txt|md|csv|log)$/i.test(f.name)){ all+='\n\n===== '+f.name+' (TEXT) =====\n'+(await readAsText(f)||'').trim(); }
-    else { all+='\n\n===== '+f.name+' (не извлечено) =====\n[Тип не поддержан — файл будет приложен в архив]'; }
-  }catch(e){ all+='\n\n===== '+f.name+' (ошибка) =====\n[Не удалось извлечь текст: '+e.message+']'; } }
-  return all.trim();
+function handleAnswer(val){
+  const q=QUESTIONS[chatState.i];
+  chatState.answers[q.id]=val;
+  chatPost(val,'user'); askNext();
 }
 
-/* ====== Кастомные блоки ====== */
-function addCustomBlock(type){
-  const id = 'block_'+Math.random().toString(36).slice(2,9);
-  analysis.custom.push({id, type, text:''});
-  renderCustomBlocks();
+$('#startChat').onclick=()=>{ $('#chatBox').innerHTML=''; chatState.i=-1; chatState.answers={}; chatPost('Поехали. Я задам ряд коротких вопросов.','bot'); askNext(); }
+$('#sendAnswer').onclick=()=>{ const v=$('#answerInput').value.trim(); if(!v) return; $('#answerInput').value=''; handleAnswer(v); }
+$('#addIdeaChat').onclick=()=> $('#ideaChatBox').classList.toggle('hidden');
+
+$('#fileChat').onchange=e=>{ chatState.files = Array.from(e.target.files||[]); renderFilesList($('#filesChat'), chatState.files); }
+
+/*** DOCX из чата ***/
+async function buildFromChat(){
+  // собрать ответы «вопрос → ответ»
+  const ansLines = QUESTIONS.map(q=>{
+    const a = chatState.answers[q.id] || '—';
+    return `• ${q.q}\n  Ответ на форму: ${a}`;
+  }).join('\n');
+  // извлечь текст из приложенных файлов
+  const docsText = chatState.files.length? await extractFromFiles(chatState.files) : '(файлы не приложены)';
+  const idea = ($('#ideaChat').value||'').trim() || '(не указано)';
+  $('#statusChat').textContent='собираю документ…';
+  const blob = await buildDocx({templateText:TEMPLATE_PROMPT_TEXT, answersText:ansLines, docsText:docsText, ideasText:idea, fileName:'maestro_chat.docx'});
+  $('#statusChat').textContent='готово: maestro_chat.docx';
+  return blob;
 }
-function removeCustomBlock(id){
-  analysis.custom = analysis.custom.filter(b=>b.id!==id);
-  renderCustomBlocks();
-}
-function renderCustomBlocks(){
-  const wrap = $('#customBlocks');
-  wrap.innerHTML = '';
-  analysis.custom.forEach((b, idx)=>{
-    const card = document.createElement('div');
-    card.className = 'customCard';
-    card.innerHTML = `
-      <div class="customHead">
-        <div class="badge">${idx+1}. ${b.type}</div>
-        <div class="del" title="Удалить" data-id="${b.id}">×</div>
-      </div>
-      <textarea data-id="${b.id}" class="output" style="min-height:120px" placeholder="Вставьте текст…"></textarea>
-      <div class="meta">Совет: можно вставлять большие тексты — они войдут в анализ и финальный промт.</div>
-    `;
-    wrap.appendChild(card);
-  });
-  wrap.querySelectorAll('.del').forEach(btn=>{
-    btn.addEventListener('click', ()=> removeCustomBlock(btn.getAttribute('data-id')));
-  });
-  wrap.querySelectorAll('textarea').forEach(ta=>{
-    ta.addEventListener('input', ()=> {
-      const id = ta.getAttribute('data-id');
-      const block = analysis.custom.find(x=>x.id===id);
-      if(block) block.text = (ta.value||'');
-    });
+$('#buildDocChat').onclick=buildFromChat;
+$('#zipChat').onclick=async()=>{
+  const zip=new JSZip(); const blob=await buildFromChat(); zip.file('maestro_chat.docx', blob);
+  if(chatState.files.length){ const fd=zip.folder('attachments'); for(const f of chatState.files){ fd.file(f.name, await f.arrayBuffer()); } }
+  saveAs(await zip.generateAsync({type:'blob'}),'maestro_chat_package.zip');
+};
+
+/*** ====== РЕЖИМ «АНАЛИЗ ДОКУМЕНТОВ» ====== ***/
+const analyzeState = {files:[], blocks:[]}; // blocks: [{id,title,text}]
+function rerenderBlocks(){
+  const box=$('#customList'); box.innerHTML = analyzeState.blocks.length? '' : '—';
+  analyzeState.blocks.forEach(b=>{
+    const wrap=document.createElement('div'); wrap.className='pill'; wrap.innerHTML=`${b.title} <span class="muted">(${b.text.length} симв.)</span>`;
+    box.appendChild(wrap);
   });
 }
-$('#plusBtn').addEventListener('click', ()=>{
-  const m = $('#plusMenu');
-  m.style.display = (m.style.display==='block'?'none':'block');
-});
-document.addEventListener('click', (e)=>{
-  const m = $('#plusMenu');
-  if (!m.contains(e.target) && !$('#plusBtn').contains(e.target)) m.style.display='none';
-});
-$('#plusMenu').querySelectorAll('.item').forEach(it=>{
-  it.addEventListener('click', ()=>{
-    addCustomBlock(it.getAttribute('data-type'));
-    $('#plusMenu').style.display='none';
-  });
-});
+$('#fileAnalyze').onchange=e=>{ analyzeState.files = Array.from(e.target.files||[]); $('#filesAnalyze').innerHTML = analyzeState.files.length? analyzeState.files.map(f=>toPill(f.name,f.size)).join(' ') : '—'; };
 
-/* ====== Эвристики покрытия ====== */
-function coverageHeuristics(text){
-  text=(text||'').toLowerCase();
-  const hits=new Set();
-  const pats=[['client',/(клиент|заказчик|компан|организац)/],['problem',/(проблем|pain|задач)/],
-    ['deadline',/(срок|дедлайн|крайн)/],['budget',/(бюджет|стоимост|инвестиц)/],
-    ['platform',/\b(vr|ar|web|веб|мобильн|киоск|панел|ios|android)\b/],['audience',/(аудитори|пользовател|учащ|сотрудник|посетител)/],
-    ['users',/(количеств|пользоват|массов|групп)/],['place',/(офис|выставк|дом|улиц|площад|школ|университ|город)/],
-    ['script_ready',/(сценар|тз|бриф|описан)/],['duration',/(минут|длит|сеанс|хронометр)/],
-    ['interaction',/(обучени|тест|геймпле|интерак|пассивн|активн|викторин)/],
-    ['assets',/(3d|модель|ассет|cad|fbx|obj|анимац)/],['texts',/(текст|контент|описан|субтитр)/],
-    ['voice',/(озвуч|диктор|аудио|звук|голос)/],['quality',/(фотореал|реалист|стилиз|простая графика)/],
-    ['gear',/(pico|quest|meta|vive|hololens|оборудов|смартфон|телефон)/],['gear_count',/(комплект|шлем|устройств|парк)/],
-    ['gear_budget',/(закупк|бюджет оборуд)/],['install',/(стационарн|переносн)/],
-    ['offline',/(офлайн|без интернета|автоном|кэш)/],['devices',/(кроссплатформ|android|ios|pc|windows|mac)/],
-    ['cast',/(трансляц|на экран|tv|проектор|airplay|cast)/],['metrics',/(аналитик|метрик|kpi|retent|конверси)/],
-    ['admin',/(админ|cms|редакт)/],['bizgoal',/(продаж|обучен|профориентац|маркетинг|pr|образован|туризм)/],
-    ['kpi',/(roi|рост|сокращен|процент|конверси|nps)/] ];
-  pats.forEach(([id,rx])=> rx.test(text)&&hits.add(id));
-  return [...hits];
+$('#addBlock').onclick=()=>{
+  const title = prompt('Название блока (например: Запись разговора / Формулировка задачи / Прочий текст):','Прочий текст');
+  if(!title) return;
+  const text = prompt('Вставь или напиши текст для блока:','');
+  analyzeState.blocks.push({id:Math.random().toString(36).slice(2,9), title, text:text||''});
+  rerenderBlocks();
+};
+
+$('#runAnalyze').onclick=async()=>{
+  const filesText = await extractFromFiles(analyzeState.files);
+  const blocksText = analyzeState.blocks.map((b,i)=>`\n\n===== ${i+1}. ${b.title} =====\n${b.text}`).join('');
+  const combined = [filesText, blocksText].filter(Boolean).join('\n').trim();
+  $('#extracted').value = combined || '(ничего не извлечено)';
+  // условная оценка покрытия
+  const have = /срок|бюджет|vr|ar|веб|платформ|сценар|kpi/i.test(combined);
+  $('#coverage').textContent = have? 'есть основа (≈60–80%)' : 'данных мало (≈20–40%)';
+};
+
+async function buildFromAnalyze(){
+  const docsText = $('#extracted').value.trim() || '(ничего не извлечено)';
+  const ansLines = '(режим «Анализ документов» — ответы формы отсутствуют)';
+  const ideas = analyzeState.blocks.filter(b=>/идея/i.test(b.title)).map(b=>b.text).join('\n') || '(не указано)';
+  const blob = await buildDocx({templateText:TEMPLATE_PROMPT_TEXT, answersText:ansLines, docsText:docsText, ideasText:ideas, fileName:'maestro_analyze.docx'});
+  return blob;
 }
-function buildFollowup(missingIds){
-  if (!missingIds.length) return 'Все обязательные сведения получены.';
-  const MAP = {
-    client:'Подскажите, кто заказчик (индустрия/размер/специфика)?',
-    problem:'Сформулируйте главную проблему проекта (1–2 предложения).',
-    deadline:'Какой крайний срок/когда должен быть результат?',
-    budget:'Есть ли ориентир по бюджету или диапазон?',
-    platform:'На какой платформе хотите запуск (VR/AR/веб/моб/киоск)?',
-    audience:'Кто конечные пользователи (возраст/сфера/подготовка)?',
-    users:'Сколько пользователей: 1 / группа / массово?',
-    place:'Где будут использовать: офис/выставка/дом/улица/город?',
-    script_ready:'Есть ли материалы по сценарию/ТЗ?',
-    duration:'Сколько минут длится пользовательский опыт?',
-    interaction:'Какой тип: пассивный/активный/обучение/комбинация?',
-    assets:'Есть 3D-модели/анимации? Пришлите, если да.',
-    texts:'Есть тексты/описания? Нужна ли помощь?',
-    voice:'Нужна ли дикторская озвучка?',
-    quality:'Желаемый уровень графики?',
-    gear:'Есть ли VR/AR-оборудование у клиента? Какое?',
-    gear_count:'Сколько комплектов нужно?',
-    gear_budget:'Оборудование в бюджете проекта или отдельно?',
-    install:'Стационарная или переносная установка?',
-    offline:'Нужна офлайн-работа без интернета/кэш?',
-    devices:'Нужна адаптация под разные устройства?',
-    cast:'Нужна трансляция на экран/проектор?',
-    metrics:'Собирать аналитику использования?',
-    admin:'Нужна админ-панель?',
-    bizgoal:'Какая бизнес-задача в приоритете?',
-    kpi:'Какими метриками измерять успех?'
-  };
-  return missingIds.map((id,i)=> (i+1)+'. '+(MAP[id]||('Уточните: '+id))).join('\n');
-}
+$('#buildDocAnalyze').onclick=buildFromAnalyze;
+$('#zipAnalyze').onclick=async()=>{
+  const zip=new JSZip(); const blob=await buildFromAnalyze(); zip.file('maestro_analyze.docx', blob);
+  if(analyzeState.files.length){ const fd=zip.folder('attachments'); for(const f of analyzeState.files){ fd.file(f.name, await f.arrayBuffer()); } }
+  // пользовательские блоки в отдельной папке
+  if(analyzeState.blocks.length){ const cd=zip.folder('custom'); analyzeState.blocks.forEach((b,i)=>cd.file(`${String(i+1).padStart(2,'0')}_${b.title}.txt`, b.text||'')); }
+  saveAs(await zip.generateAsync({type:'blob'}),'maestro_analyze_package.zip');
+};
 
-/* ====== Черновик концепции ====== */
-function conceptDraftFrom(text){
-  const vr=/\bvr\b|виртуал/i.test(text), ar=/\bar\b|допол/i.test(text), web=/web|веб/i.test(text);
-  const platform= vr?'VR': ar?'AR': web?'Веб':'Определить на созвоне';
-  const deadline=(text.match(/(\d{1,2}\.\d{1,2}\.\d{2,4}|Q[1-4]\s?\d{4}|[Яя]нвар|[Фф]еврал|Март|Апрел|Май|Июн|Июл|Август|Сентябр|Октябр|Ноябр|Декабр)/g)||[]).slice(0,2).join(', ')||'Не указано';
-  const budget=(text.match(/(\d[\d\s]{2,})(?:\s?(?:₽|руб|rubl|RUB|USD|EUR))/gi)||[])[0]||'Не указан';
-  let d='Название: Концепция '+platform+'-решения (черновик)\n';
-  d+='Платформа: '+platform+'\nОриентир по срокам: '+deadline+'\nОриентир по инвестициям: '+budget+'\n\n';
-  d+='Ключевые цитаты:\n';
-  const s=(text||'').split(/[\.\!\?]\s+/).filter(s=>s.length>50&&s.length<300).slice(0,3);
-  d+= s.length? s.map(x=>'— «'+x.trim()+'»').join('\n') : '— (нужно уточнить на созвоне)';
-  d+='\n\nСтруктура КП (черновик):\n1) Заголовок → результат.\n2) Понимание ситуации (цитаты).\n3) Концепция без техножаргона.\n4) Путь пользователя.\n5) 2–3 варианта.\n6) Доказательства/кейсы.\n7) Инвестиции и сроки.\n8) Следующий шаг.';
-  d+='\n\nПримечание: блок — конструктор, не цитаты.'; return d;
-}
-
-/* ====== Сводка и структура ====== */
-function buildFullDocument(combined, files, custom){
-  let out = '';
-  out += '# Сводный документ (все ответы/материалы)\n';
-  out += '— Сформировано: '+new Date().toLocaleString()+'\n\n';
-  out += '## Файлы\n';
-  out += (files.length? files.map((f,i)=> (i+1)+'. '+f.name+' ('+Math.round(f.size/1024)+' КБ)').join('\n') : '—')+'\n\n';
-  out += '## Текстовые блоки пользователя\n';
-  if (custom.length){
-    custom.forEach((b,i)=>{
-      out += (i+1)+'. '+b.type+'\n';
-      out += (b.text? '«'+b.text.trim()+'»' : '—')+'\n\n';
-    });
-  } else { out+='—\n\n'; }
-  out += '## Цитаты из файлов и блоков (общий массив)\n';
-  out += (combined||'—')+'\n';
-  out += '\nПримечание: документ состоит из цитат и вложений без переформулирования.';
-  return out;
-}
-function distributeToKPStructure(combined){
-  const buckets = [
-    {title:'1) Заголовочный блок (результат/для кого/за срок/без сложностей)', rx:/(результат|для|за\s\d|без\s|\broi\b|эффект)/i, items:[]},
-    {title:'2) Понимание ситуации клиента (проблемы/боли/цена бездействия)', rx:/(проблем|боль|сложност|риск|бездеятель|трудност)/i, items:[]},
-    {title:'3) Концепция решения (суть без жаргона)', rx:/(решени|концепц|подход|идея|предлагаем)/i, items:[]},
-    {title:'4) Как это работает (путь пользователя/шаги)', rx:/(пользоват|шаг|сценар|процесс|экран|взаимодейств|маршрут)/i, items:[]},
-    {title:'5) Варианты реализации (пакеты/уровни)', rx:/(вариант|пакет|базов|стандарт|премиум|уров)/i, items:[]},
-    {title:'6) Почему мы (кейсы/экспертиза/доказательства)', rx:/(кейс|опыт|экспертиз|команда|доказат|портфолио)/i, items:[]},
-    {title:'7) Техническая часть (оборудование/интеграции/архитектура)', rx:/(оборудов|pico|quest|vive|hololens|api|интеграц|архитектур|технол|cms|офлайн)/i, items:[]},
-    {title:'8) Инвестиции и сроки', rx:/(бюджет|стоимост|инвестиц|срок|дедлайн|график|календар)/i, items:[]},
-    {title:'9) Следующий шаг', rx:/(созвон|бриф|демо|пилот|следующ|дальш)/i, items:[]}
-  ];
-  const other = {title:'10) Не классифицировано (требует ручного разбора)', items:[]};
-  const sentences = (combined||'')
-    .split(/(?<=[\.\!\?])\s+/)
-    .map(s=>s.trim()).filter(s=>s.length>0);
-
-  sentences.forEach(s=>{
-    const hit = buckets.find(b=> b.rx.test(s));
-    (hit||other).items.push('— «'+s+'»');
-  });
-
-  let out = '';
-  [...buckets, other].forEach(b=>{
-    out += b.title+'\n';
-    out += (b.items.length? b.items.join('\n') : '—')+'\n\n';
-  });
-  out += 'Примечание: распределение эвристическое; фразы — только цитаты, без перефразирования.';
-  return out.trim();
-}
-
-/* ====== Тезисы и финальный промт ====== */
-function uniqueSentencesFrom(text){
-  const arr = (text||'').split(/(?<=[\.\!\?])\s+/).map(s=>s.trim()).filter(Boolean);
-  const seen = new Set(); const out = [];
-  for(const s of arr){ const key = s.toLowerCase().replace(/\s+/g,' ').slice(0,400);
-    if(!seen.has(key)){ seen.add(key); out.push(s); }
-  }
-  return out;
-}
-function buildTheses(text){
-  // стараемся вытащить максимум, но компактнее, чем полный массив
-  const sents = uniqueSentencesFrom(text);
-  const long = sents.filter(s=>s.length>40);
-  // приоритезируем предложения с ключами
-  const keys = /(клиент|заказчик|цель|проблем|срок|бюджет|платформ|аудитор|офлайн|карта|достопр|ар|vr|викторин|персонаж|озвучк|метрик|kpi|интеграц|офис|улиц|мобил|приложен|веб)/i;
-  const prioritized = long.filter(s=>keys.test(s)).concat(long.filter(s=>!keys.test(s)));
-  // ограничение для читабельности — но в финальном промте мы добавим и "Полный корпус"
-  return prioritized.slice(0,200).map(s=>'• '+s).join('\n');
-}
-function rebuildFinalPrompt(){
-  const template = (analysis.templateText||'[ВСТАВЬТЕ СВОЙ DOCX-ШАБЛОН ПРОМТА ЧЕРЕЗ КНОПКУ ВЫШЕ]\n\n— Ниже автоматически подставлены тезисы и весь корпус материалов.\n');
-  const combined = analysis.combined || $('#extractedText').value || '';
-  const structure = $('#structureOut').value || '';
-  const fullDoc = $('#fullDoc').value || '';
-  const concept = $('#concept').value || '';
-  const hits = coverageHeuristics(combined);
-  const missing = REQUIRED_IDS.filter(id=>!hits.includes(id));
-  const follow = buildFollowup(missing);
-  const theses = buildTheses(combined);
-
-  const final =
-`[BEGIN PINNED TEMPLATE — ${APP_NAME}]
-${template.trim()}
-[END PINNED TEMPLATE]
-
-[GUIDELINES]
-— Используй закреплённый текст выше как главный стиль и структуру.
-— Не переписывай цитаты без необходимости; на их основе сформируй КП.
-— Покажи бизнес-ценность, затем путь пользователя, затем варианты реализации.
-— В конце добавь чёткий следующий шаг.
-
-[BRIEF THESES — из всех материалов, автоматически отобрано]
-${theses||'— Тезисы не обнаружены.'}
-
-[KP STRUCTURE — цитаты разложены по разделам]
-${structure||'— Нет данных.'}
-
-[CONCEPT DRAFT — машинный черновик]
-${concept||'— Нет данных.'}
-
-[MISSING INFO — уточняющие вопросы]
-${follow||'— Нет.'}
-
-[FULL MATERIALS CORPUS — включай по мере необходимости, это «источник правды»]
-${fullDoc||combined||'— Пусто.'}
-`;
-  $('#finalPrompt').value = final;
-}
-
-/* ====== Строим все выходы ====== */
-function buildFilesOutputs(combined, files){
-  const hits = coverageHeuristics(combined);
-  const missing = REQUIRED_IDS.filter(id=>!hits.includes(id));
-  const pct = Math.round((REQUIRED_IDS.length - missing.length)/REQUIRED_IDS.length*100);
-  const haveList = hits.map(id=>'• '+(QUESTIONS.find(x=>x.id===id)?.text||id)).join('\n') || '—';
-  const missList = missing.map(id=>'• '+(QUESTIONS.find(x=>x.id===id)?.text||id)).join('\n') || '—';
-  const script = buildFollowup(missing);
-  const concept = conceptDraftFrom(combined);
-  const fullDoc = buildFullDocument(combined, files, analysis.custom);
-  const structure = distributeToKPStructure(combined);
-  return {pct, haveList, missList, script, concept, fullDoc, structure};
-}
-function refreshOutputs(){
-  const combined = analysis.combined;
-  const out = buildFilesOutputs(combined, analysis.files);
-  $('#covPct').textContent = out.pct + '%';
-  $('#covHave').textContent = out.haveList;
-  $('#covMiss').textContent = out.missList;
-  $('#callScript').textContent = out.script;
-  $('#concept').value = out.concept;
-  $('#fullDoc').value = out.fullDoc;
-  $('#structureOut').value = out.structure;
-  $('#extractedText').value = combined || '(текст не найден)';
-  rebuildFinalPrompt();
-}
-
-/* ====== ZIP ====== */
-async function zipFiles(){
-  const zip=new JSZip();
-  zip.file('extracted_quotes_plus_blocks.txt',$('#extractedText').value||'');
-  zip.file('full_doc.txt',$('#fullDoc').value||'');
-  zip.file('structured_outline.txt',$('#structureOut').value||'');
-  zip.file('concept_draft.txt',$('#concept').value||'');
-  zip.file('final_prompt.txt',$('#finalPrompt').value||'');
-
-  if(analysis.custom.length){
-    const cf = zip.folder('custom');
-    analysis.custom.forEach((b,i)=> cf.file(String(i+1).padStart(2,'0')+'_'+b.type+'.txt', b.text||''));
-  }
-  if(analysis.files.length){
-    const af = zip.folder('attachments');
-    for(const f of analysis.files){ const arr=await f.arrayBuffer(); af.file(f.name, arr); }
-  }
-  if(analysis.brandDataUrl){
-    // logo into assets
-    const base64 = analysis.brandDataUrl.split(',')[1];
-    if(base64) zip.folder('assets').file('brand.png', base64, {base64:true});
-  }
-  const blob=await zip.generateAsync({type:'blob'});
-  saveAs(blob,'maestro_package.zip');
-}
-
-/* ====== Анализ вкладки ====== */
-$('#fileInputAnalysis').addEventListener('change', e=>{
-  analysis.files = Array.from(e.target.files||[]);
-  renderFiles($('#fileListAnalysis'), analysis.files);
-});
-$('#analyze').addEventListener('click', async ()=>{
-  const fileText = analysis.files.length ? await extractTextFromFiles(analysis.files) : '';
-  const customText = analysis.custom.map((b,i)=> `\n\n===== Блок #${i+1}: ${b.type} =====\n${(b.text||'').trim()}`).join('');
-  analysis.extracted = fileText;
-  analysis.combined = (fileText + customText).trim();
-  refreshOutputs();
-});
-$('#copyFiles').addEventListener('click', ()=>{
-  const full = [
-    '# Извлечённые цитаты + блоки',
-    $('#extractedText').value,
-    '',
-    '# Оценка полноты',
-    'Покрытие: '+$('#covPct').textContent,
-    'Хватает:\n'+$('#covHave').textContent,
-    'Не хватает:\n'+$('#covMiss').textContent,
-    '',
-    '# Скрипт вопросов',
-    $('#callScript').textContent,
-    '',
-    '# Сводный документ',
-    $('#fullDoc').value,
-    '',
-    '# Распределение по структуре КП',
-    $('#structureOut').value,
-    '',
-    '# Черновик концепции КП',
-    $('#concept').value
-  ].join('\n');
-  navigator.clipboard.writeText(full);
-});
-$('#zipFiles').addEventListener('click', zipFiles);
-
-/* ====== Шаблон промта (DOCX) ====== */
-$('#templateInput').addEventListener('change', async (e)=>{
-  const f = e.target.files?.[0]; if(!f) return;
-  try{
-    const data = await readAsAB(f);
-    const out = await window.mammoth.extractRawText({arrayBuffer:data});
-    analysis.templateText = (out.value||'').trim();
-  }catch(err){
-    analysis.templateText = '[Ошибка чтения DOCX-шаблона: '+(err?.message||'unknown')+']';
-  }
-  rebuildFinalPrompt();
-});
-$('#rebuildPrompt').addEventListener('click', rebuildFinalPrompt);
-$('#copyPrompt').addEventListener('click', ()=> navigator.clipboard.writeText($('#finalPrompt').value||'') );
-
-/* ====== Чат ====== */
-function chatPush(role, text){
-  analysis.chat.push({role, text});
-  const box = $('#chatBox');
-  const m = document.createElement('div');
-  m.className = 'msg '+(role==='user'?'user':'bot');
-  m.textContent = text;
-  box.appendChild(m);
-  box.scrollTop = box.scrollHeight;
-}
-function smartReply(){
-  const combined = analysis.combined;
-  const hits = coverageHeuristics(combined);
-  const missing = REQUIRED_IDS.filter(id=>!hits.includes(id));
-  if(missing.length){
-    chatPush('bot', 'Спасибо! Не хватает ещё:\n'+buildFollowup(missing));
-  } else {
-    chatPush('bot', 'Отлично, данных достаточно, черновики КП и финальный промт уже готовы во вкладке «Вариант 1: Анализ». Если хотите — добавьте кейсы/цифры для секции «Почему мы».');
-  }
-}
-$('#sendChat').addEventListener('click', ()=>{
-  const val = ($('#chatInput').value||'').trim();
-  if(!val) return;
-  $('#chatInput').value='';
-  chatPush('user', val);
-  // включаем в корпус
-  analysis.combined = (analysis.combined+'\n\n===== ЧАТ (пользователь) =====\n'+val).trim();
-  refreshOutputs();
-  // имитация "набирает..."
-  const box = $('#chatBox');
-  const t = document.createElement('div'); t.className='typing'; t.innerHTML='<i></i><i></i><i></i>'; box.appendChild(t); box.scrollTop=box.scrollHeight;
-  setTimeout(()=>{ box.removeChild(t); smartReply(); }, 500);
-});
-$('#chatFileInput').addEventListener('change', async (e)=>{
-  const files = Array.from(e.target.files||[]);
-  if(!files.length) return;
-  chatPush('user', '📎 Прикрепил файлов: '+files.length);
-  const text = await extractTextFromFiles(files);
-  analysis.combined = (analysis.combined+'\n\n===== ЧАТ: ТЕКСТ ИЗ ФАЙЛОВ =====\n'+text).trim();
-  refreshOutputs();
-});
-$$('.chip[data-say]').forEach(ch=>{
-  ch.addEventListener('click', ()=>{
-    const t = ch.getAttribute('data-say')||'';
-    $('#chatInput').value = ( ($('#chatInput').value||'') ? ($('#chatInput').value+'\n') : '' ) + t;
-  });
-});
-
-/* ====== Инициализация ====== */
-document.title = APP_NAME+' — конструктор КП, анализ и финальный промт';
-$('#brandImg').alt = APP_NAME;
-$('#brandImg').ariaLabel = APP_NAME;
-$('#brandImg').title = 'Нажмите, чтобы загрузить ваш union-dot PNG';
-addCustomBlock('Запрос клиента'); // стартовый один блок по умолчанию
+/*** Мелочи ***/
+$('#ideaChat').addEventListener('input',()=>{ chatState.idea = $('#ideaChat').value; });
 </script>
 </body>
 </html>
